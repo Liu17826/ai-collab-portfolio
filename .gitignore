@@ -1,0 +1,50 @@
+# ===== 敏感信息 =====
+.env
+.env.*
+*.secret
+*.pem
+# AI 服务 key 前缀兜底
+sk-*
+sk_*
+
+# ===== 用户数据/使用记录 =====
+*.json
+*.log
+*.bak
+*history*
+*chat_history*
+*conversation*
+*memory*
+memory.json
+history.json
+chat_history.json
+
+# ===== 系统/编辑器 =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== Python (防御性) =====
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+
+# ===== Node (防御性) =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ===== 构建产物 =====
+dist/
+build/
+out/
+.cache/
+
+# ===== 临时文件 =====
+*.tmp
+*.temp

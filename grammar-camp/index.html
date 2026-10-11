@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>语法训练营</title>
+<style>
+  :root{
+    --paper:#F7F2E7;
+    --paper-line:#E8DEC8;
+    --ink:#2B2A28;
+    --ink-soft:#6b6558;
+    --card:#FFFDF8;
+    --purple:#8B5CF6;
+    --pink:#EC6BA5;
+    --blue:#3E8CFF;
+    --green:#2FAE83;
+    --red:#F0603D;
+    --teal:#1FA6A0;
+    --violet:#6D4CFF;
+    --gray:#9A948A;
+    --shadow: 0 2px 10px rgba(43,42,40,0.08);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; -webkit-font-smoothing:antialiased;}
+  body{ padding-bottom: 40px; }
+  h1,h2,h3{ font-family: "Songti SC", "Noto Serif SC", Georgia, serif; margin:0; font-weight:700; }
+  .mono{ font-family: "SF Mono", Menlo, monospace; }
+  #app{ max-width: 560px; margin: 0 auto; min-height:100vh; position:relative; }
+
+  /* ---------- top bar ---------- */
+  .topbar{ position:sticky; top:0; z-index:20; background:var(--paper); padding:14px 16px 10px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--paper-line); }
+  .topbar .brand{ display:flex; align-items:center; gap:8px; }
+  .topbar .brand h1{ font-size:19px; letter-spacing:0.5px; }
+  .topbar .dot{ width:8px; height:8px; border-radius:50%; background:var(--violet); }
+  .iconbtn{ border:none; background:var(--card); box-shadow:var(--shadow); border-radius:12px; padding:8px 12px; font-size:13px; color:var(--ink); display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .iconbtn:active{ transform: scale(0.97); }
+  .badge{ background:var(--red); color:#fff; border-radius:10px; font-size:11px; padding:1px 6px; min-width:16px; text-align:center; }
+
+  /* ---------- home ---------- */
+  .section-label{ font-size:12px; color:var(--ink-soft); letter-spacing:1px; margin:22px 16px 10px; text-transform:uppercase; }
+  .cardgrid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding:0 16px; }
+  .topic-card{ background:var(--card); border-radius:16px; padding:14px; box-shadow:var(--shadow); cursor:pointer; position:relative; border:1px solid rgba(0,0,0,0.03); min-height:108px; display:flex; flex-direction:column; justify-content:space-between; }
+  .topic-card:active{ transform: scale(0.98); }
+  .topic-card .chip{ width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:700; margin-bottom:8px; }
+  .topic-card .ttl{ font-size:14.5px; font-weight:700; line-height:1.3; }
+  .topic-card .sub{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+  .progress-dots{ display:flex; gap:3px; margin-top:8px; }
+  .progress-dots span{ width:14px; height:4px; border-radius:2px; background:var(--paper-line); }
+  .progress-dots span.on{ background: currentColor; }
+
+  .hero{ margin:16px 16px 0; padding:18px; border-radius:18px; background:linear-gradient(135deg, #EFE6FF, #F7F2E7); position:relative; overflow:hidden; }
+  .hero .note{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; line-height:1.5; }
+
+  /* ---------- topic detail ---------- */
+  .detail-header{ padding:6px 16px 0; }
+  .backrow{ display:flex; align-items:center; gap:10px; padding:10px 16px 0; }
+  .backbtn{ border:none; background:none; font-size:15px; color:var(--ink-soft); padding:4px 0; cursor:pointer; }
+  .topic-title{ display:flex; align-items:center; gap:10px; padding:8px 16px 4px; }
+  .topic-title .chip-lg{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; }
+  .topic-title h2{ font-size:20px; }
+
+  .tabs{ display:flex; gap:6px; padding:10px 16px 4px; overflow-x:auto; }
+  .tab{ flex:none; border:none; background:var(--card); padding:8px 14px; border-radius:999px; font-size:13px; color:var(--ink-soft); box-shadow:var(--shadow); cursor:pointer; white-space:nowrap; }
+  .tab.active{ background:var(--ink); color:#fff; }
+
+  .panel{ padding:14px 16px 40px; }
+
+  /* notebook card */
+  .paper-card{
+    background: repeating-linear-gradient(var(--card), var(--card) 27px, #EFE7D3 28px);
+    border-radius:14px; padding:18px 16px; box-shadow:var(--shadow); border:1px solid rgba(0,0,0,0.04);
+    margin-bottom:14px; font-size:14.5px; line-height:1.85;
+  }
+  .paper-card b{ font-weight:700; }
+  .formula-row{ font-family:"SF Mono", Menlo, monospace; font-size:13px; background:#F1ECDD; padding:8px 10px; border-radius:8px; margin:6px 0; display:inline-block; }
+  .example-line{ margin:10px 0; }
+  .note-tag{ font-size:11px; color:var(--ink-soft); }
+
+  .hl-conn{ font-weight:800; border-bottom:3px solid var(--violet); padding-bottom:1px; }
+  .hl-clause{ background: rgba(139,92,246,0.13); border-radius:6px; padding:1px 4px; box-shadow: inset 0 -2px 0 rgba(139,92,246,0.45); }
+  .hl-red{ border-bottom:3px solid var(--red); font-weight:800; }
+
+  .qsentence{ font-size:16.5px; font-weight:600; margin-bottom:14px; line-height:1.6; }
+  .opt-grid{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ text-align:left; border:1.5px solid var(--paper-line); background:var(--card); border-radius:10px; padding:10px 12px; font-size:14px; cursor:pointer; }
+  .opt.correct{ border-color:var(--green); background:rgba(47,174,131,0.12); }
+  .opt.wrong{ border-color:var(--red); background:rgba(240,96,61,0.12); }
+  .qlabel{ font-size:12px; color:var(--ink-soft); margin:14px 0 6px; }
+  .reveal-box{ margin-top:16px; padding:14px; border-radius:12px; background:#FBF7EA; border:1px dashed var(--paper-line); font-size:14.5px; line-height:1.8; }
+  .btn{ border:none; padding:11px 16px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-ghost{ background:var(--card); color:var(--ink); box-shadow:var(--shadow); }
+  .btn:disabled{ opacity:0.4; }
+  .row-btns{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+
+  textarea, input[type=text], input[type=password]{ width:100%; border:1.5px solid var(--paper-line); border-radius:12px; padding:12px; font-size:15px; font-family:inherit; resize:vertical; min-height:74px; background:var(--card); color:var(--ink); }
+  textarea{ min-height:74px; }
+  input[type=text], input[type=password]{ min-height:auto; }
+  textarea:focus, input:focus{ outline:2px solid var(--violet); border-color:transparent; }
+
+  .scenario-card{ background:var(--card); border-radius:14px; padding:16px; box-shadow:var(--shadow); margin-bottom:14px; }
+  .scenario-card .lbl{ font-size:11px; color:var(--violet); font-weight:700; letter-spacing:0.5px; margin-bottom:6px; }
+  .scenario-card .prompt{ font-size:15px; line-height:1.6; margin-bottom:10px; }
+  .hint{ font-size:12px; color:var(--ink-soft); }
+
+  .chip-pill{ display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:12.5px; margin:3px 4px 3px 0; color:#fff; }
+  .feedback-box{ margin-top:14px; padding:14px; border-radius:12px; }
+  .feedback-box.good{ background:rgba(47,174,131,0.12); border:1px solid rgba(47,174,131,0.35); }
+  .feedback-box.bad{ background:rgba(240,96,61,0.10); border:1px solid rgba(240,96,61,0.3); }
+  .feedback-title{ font-weight:700; font-size:14px; margin-bottom:8px; }
+  .feedback-line{ font-size:13.5px; line-height:1.7; margin:4px 0; }
+  .corrected-line{ font-size:14.5px; margin-top:8px; padding:8px 10px; background:#fff; border-radius:8px; font-style:italic; }
+
+  .spinner{ width:16px; height:16px; border:2px solid rgba(0,0,0,0.15); border-top-color:var(--ink); border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; vertical-align:middle; margin-right:6px; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .errbook-item{ background:var(--card); border-radius:14px; padding:14px; box-shadow:var(--shadow); margin-bottom:10px; }
+  .errbook-item .meta{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .errbook-item .topictag{ font-size:11px; padding:2px 8px; border-radius:999px; color:#fff; }
+  .errbook-item .ts{ font-size:11px; color:var(--ink-soft); }
+  .errbook-item .q{ font-size:14px; margin:6px 0; font-weight:600; }
+  .errbook-item .a{ font-size:13px; color:var(--ink-soft); margin:4px 0; }
+  .empty{ text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:14px; }
+  .clear-row{ display:flex; justify-content:flex-end; padding:0 16px 6px; }
+  .small-link{ font-size:12.5px; color:var(--ink-soft); background:none; border:none; text-decoration:underline; cursor:pointer; }
+
+  /* ---------- modal ---------- */
+  .modal-mask{ position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:50; display:flex; align-items:flex-end; justify-content:center; padding:0; animation:fadeIn 0.2s; }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .modal{ background:var(--paper); width:100%; max-width:560px; border-radius:20px 20px 0 0; padding:20px 18px 28px; max-height:90vh; overflow-y:auto; }
+  .modal h3{ font-size:18px; margin-bottom:6px; }
+  .modal .sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; line-height:1.6; }
+  .modal label{ display:block; font-size:13px; font-weight:600; margin:14px 0 6px; }
+  .modal .field{ margin-bottom:10px; }
+  .modal .status{ margin-top:10px; padding:10px 12px; border-radius:10px; font-size:13px; line-height:1.6; }
+  .modal .status.ok{ background:rgba(47,174,131,0.12); border:1px solid rgba(47,174,131,0.35); }
+  .modal .status.err{ background:rgba(240,96,61,0.10); border:1px solid rgba(240,96,61,0.3); }
+  .modal .status.idle{ background:#F1ECDD; border:1px dashed var(--paper-line); color:var(--ink-soft); }
+  .modal .close-x{ position:absolute; right:16px; top:14px; font-size:22px; background:none; border:none; color:var(--ink-soft); cursor:pointer; }
+  .modal .provider-pick{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+  .modal .pchip{ padding:6px 12px; border-radius:999px; border:1.5px solid var(--paper-line); background:var(--card); font-size:13px; cursor:pointer; }
+  .modal .pchip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .topbar-actions{ display:flex; gap:8px; align-items:center; }
+  .key-dot{ width:6px; height:6px; border-radius:50%; background:var(--gray); }
+  .key-dot.on{ background:var(--green); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================= DATA ============================= */
+const COLORS = { purple:'#8B5CF6', pink:'#EC6BA5', blue:'#3E8CFF', green:'#2FAE83', red:'#F0603D', teal:'#1FA6A0', violet:'#6D4CFF', gray:'#9A948A' };
+
+const TOPICS = [
+{
+  id:'obj', title:'宾语从句', cat:'名词性从句', color:'purple', short:'一个句子作宾语',
+  explanation:`
+    <p><b>含义：</b>一个句子（从句）在主句里作动词或介词的宾语。</p>
+    <div class="formula-row">主句(连接词) 陈述句 → 宾语从句</div>
+    <p><b>写法：</b>从句前加连接词。<span class="note-tag">that 可以省略，其余（what / whether / when / if …）都不能省。</span></p>
+    <p><b>位置：</b>动词后（单宾语 / 双宾语 / 介词宾语）</p>
+    <div class="example-line">I promise <span class="hl-conn">that</span> I will help you.</div>
+    <div class="example-line">You never told me <span class="hl-conn">what</span> <span class="hl-clause">you had done to my computer</span>.</div>
+    <div class="example-line">They don't know <span class="hl-conn">whether</span> <span class="hl-clause">they will finish the work on time</span>. <span class="note-tag">(whether / if)</span></div>
+    <div class="example-line">I wonder <span class="hl-conn">when</span> <span class="hl-clause">we will set out</span>.</div>
+    <div class="example-line">The first chart below shows <span class="hl-conn">how</span> <span class="hl-clause">energy is used in an average Australian household</span>.</div>
+    <div class="example-line">This will help you convince yourself <span class="hl-conn">that</span> <span class="hl-clause">favourable outcomes actually happen all the time</span>. <span class="note-tag">双宾语：convince yourself + that 从句</span></div>
+    <div class="example-line">This requires an understanding of <span class="hl-conn">what</span> <span class="hl-clause">motivates employees at different levels of management</span>. <span class="note-tag">介词宾语</span></div>
+  `,
+  structure:[
+    { type:'clause', sentence:'I promise that I will help you.',
+      connOptions:['I','promise','that','will'], connAnswer:'that',
+      spanOptions:['I promise','that I will help you','I will help you','promise that'], spanAnswer:'that I will help you',
+      reveal:'I promise <span class="hl-conn">that</span> <span class="hl-clause">I will help you</span>.',
+      note:'promise 是主句谓语动词，that 引导宾语从句作 promise 的宾语；that 在这里可以省略。' },
+    { type:'clause', sentence:'You never told me what you had done to my computer.',
+      connOptions:['never','told','me','what'], connAnswer:'what',
+      spanOptions:['me what you had done','what you had done to my computer','you had done to my computer','told me what'], spanAnswer:'what you had done to my computer',
+      reveal:'You never told me <span class="hl-conn">what</span> <span class="hl-clause">you had done to my computer</span>.',
+      note:'told 后接双宾语：me（间接宾语）+ what 引导的从句（直接宾语）。' },
+    { type:'clause', sentence:'This requires an understanding of what motivates employees at different levels of management.',
+      connOptions:['requires','of','what','understanding'], connAnswer:'what',
+      spanOptions:['an understanding of what','what motivates employees at different levels of management','understanding of what motivates','requires an understanding'], spanAnswer:'what motivates employees at different levels of management',
+      reveal:'This requires an understanding of <span class="hl-conn">what</span> <span class="hl-clause">motivates employees at different levels of management</span>.',
+      note:'of 是介词，后面接的从句是介词的宾语，即"介词宾语从句"。' }
+  ],
+  scenarios:[
+    { prompt:'用 that 造一个宾语从句，表达"我保证我会按时完成这个任务"的意思。', hint:'主句谓语可以用 promise / guarantee' },
+    { prompt:'用 whether 造一个宾语从句，谈论你不确定雅思口语能不能一次通过。', hint:'I\'m not sure whether ...' }
+  ],
+  corrections:[
+    { wrong:"I don't know what should I do next.", hint:'宾语从句要用陈述句语序，不是疑问句语序' },
+    { wrong:'She told me that did she finish the work.', hint:'从句里不能用疑问句的倒装语序' }
+  ]
+},
+{
+  id:'pred', title:'表语从句', cat:'名词性从句', color:'pink', short:'一个句子作表语',
+  explanation:`
+    <p><b>含义：</b>一个句子作表语，写法和宾语从句相同。</p>
+    <p><b>位置：</b>系动词（is / was / seems …）后面，说明主语"是什么/怎么样"。</p>
+    <div class="example-line">The good news is <span class="hl-conn">that</span> <span class="hl-clause">all this can be learned</span>.</div>
+    <div class="example-line">The strong possibility is <span class="hl-conn">that</span> <span class="hl-clause">play supports the early development of children's self-control</span>.</div>
+    <p style="margin-top:12px;"><b>口语 tips：</b></p>
+    <div class="formula-row">adj. + n. is that ...</div>
+    <p>The happiest / most interesting / most surprising / most embarrassing thing is that …</p>
+  `,
+  structure:[
+    { type:'clause', sentence:'The good news is that all this can be learned.',
+      connOptions:['good','news','is','that'], connAnswer:'that',
+      spanOptions:['is that all this can be learned','that all this can be learned','all this can be learned','news is that'], spanAnswer:'that all this can be learned',
+      reveal:'The good news is <span class="hl-conn">that</span> <span class="hl-clause">all this can be learned</span>.',
+      note:'be 动词后接表语从句，说明 "good news" 具体内容是什么。' },
+    { type:'clause', sentence:"The strong possibility is that play supports the early development of children's self-control.",
+      connOptions:['strong','possibility','is','that'], connAnswer:'that',
+      spanOptions:['is that play supports','that play supports the early development of children\'s self-control','play supports the early development','possibility is that'], spanAnswer:"that play supports the early development of children's self-control",
+      reveal:"The strong possibility is <span class=\"hl-conn\">that</span> <span class=\"hl-clause\">play supports the early development of children's self-control</span>.",
+      note:'系动词 is 后是表语从句，解释 "the strong possibility" 是什么。' }
+  ],
+  scenarios:[
+    { prompt:'用 "The happiest thing is that..." 这个句型造一个表语从句，说说什么事让你最开心。', hint:'The happiest thing is that ...' },
+    { prompt:'用系动词 is + that 造句，表达"最令人惊讶的是,这次考试比预想的容易"。', hint:'The most surprising thing is that ...' }
+  ],
+  corrections:[
+    { wrong:'The problem is what he cannot pass the exam.', hint:'从句不缺成分时应该用 that，不是 what' },
+    { wrong:'My opinion is that is unfair.', hint:'从句缺了主语' }
+  ]
+},
+{
+  id:'subj', title:'主语从句', cat:'名词性从句', color:'blue', short:'一个句子作主语',
+  explanation:`
+    <p><b>含义：</b>一个句子作整个句子的主语（从句整体算单数）。</p>
+    <p><b>位置：</b>句首，或用 it 作形式主语、从句放句尾。</p>
+    <div class="example-line"><span class="hl-clause">What they lack</span> is the evidence to base policies on.</div>
+    <div class="example-line">It became apparent <span class="hl-conn">that</span> <span class="hl-clause">smell can evoke strong emotional responses</span>.</div>
+    <div class="example-line">For Layard and others like him, it is obvious <span class="hl-conn">that</span> <span class="hl-clause">the purpose of government is to promote a state of collective well-being</span>.</div>
+    <p style="margin-top:12px;"><b>写作句型：</b></p>
+    <div class="formula-row">It is + adj. + that ...</div>
+    <p>it is obvious / important / true / possible / strange / clear that …</p>
+    <div class="formula-row">It is done + that ...</div>
+    <p>It is said / known / thought / believed / admitted / acknowledged that …</p>
+  `,
+  structure:[
+    { type:'clause', sentence:'What they lack is the evidence to base policies on.',
+      connOptions:['What','they','lack','is'], connAnswer:'What',
+      spanOptions:['what they lack','they lack is','the evidence to base policies on','what they lack is the evidence'], spanAnswer:'what they lack',
+      reveal:'<span class="hl-clause">What they lack</span> is the evidence to base policies on.',
+      note:'从句 "what they lack" 作整个句子的主语，主语从句整体算单数，所以谓语用 is。' },
+    { type:'clause', sentence:'It became apparent that smell can evoke strong emotional responses.',
+      connOptions:['It','became','apparent','that'], connAnswer:'that',
+      spanOptions:['that smell can evoke strong emotional responses','smell can evoke strong','became apparent that','It became apparent'], spanAnswer:'that smell can evoke strong emotional responses',
+      reveal:'It became apparent <span class="hl-conn">that</span> <span class="hl-clause">smell can evoke strong emotional responses</span>.',
+      note:'It 是形式主语，真正的主语是 that 引导的从句，被移到了句尾。' },
+    { type:'clause', sentence:'It is obvious that the purpose of government is to promote a state of collective well-being.',
+      connOptions:['It','is','obvious','that'], connAnswer:'that',
+      spanOptions:['that the purpose of government is to promote a state of collective well-being','is obvious that','the purpose of government','It is obvious'], spanAnswer:'that the purpose of government is to promote a state of collective well-being',
+      reveal:'It is obvious <span class="hl-conn">that</span> <span class="hl-clause\">the purpose of government is to promote a state of collective well-being</span>.',
+      note:'"It is + adj. + that ..." 是主语从句最常用的写作句型之一。' }
+  ],
+  scenarios:[
+    { prompt:'用 "It is obvious that..." 造一个主语从句，说说"雅思口语需要多练习"这一点很明显。', hint:'It is obvious that ...' },
+    { prompt:'用 "What ... is ..." 从句作主语的结构造句，谈谈你现在最缺的是什么。', hint:'What I lack most is ...' }
+  ],
+  corrections:[
+    { wrong:'Whether he come or not is not sure.', hint:'从句里主谓一致有问题' },
+    { wrong:'Is obvious that she is right.', hint:'缺了形式主语 it' }
+  ]
+},
+{
+  id:'appo', title:'同位语从句', cat:'名词性从句', color:'green', short:'解释说明前一个名词',
+  explanation:`
+    <p><b>含义：</b>从句解释说明前面的抽象名词（fact / news / idea / possibility / suggestion 等）具体内容是什么。</p>
+    <p><b>位置：</b>紧跟在被说明的名词后面。</p>
+    <p class="note-tag">和定语从句的区别：同位语从句不缺任何句子成分，从句本身是完整的句子；常用 that 引导，一般不能省略。</p>
+    <div class="example-line">The fact <span class="hl-conn">that</span> <span class="hl-clause">she passed the exam</span> surprised everyone.</div>
+    <div class="example-line">There is no possibility <span class="hl-conn">that</span> <span class="hl-clause">he will change his mind</span>.</div>
+  `,
+  structure:[
+    { type:'clause', sentence:'The fact that she passed the exam surprised everyone.',
+      connOptions:['fact','that','she','surprised'], connAnswer:'that',
+      spanOptions:['that she passed the exam','she passed the exam surprised','fact that she','passed the exam'], spanAnswer:'that she passed the exam',
+      reveal:'The fact <span class="hl-conn">that</span> <span class="hl-clause">she passed the exam</span> surprised everyone.',
+      note:'that 从句解释说明 "the fact" 具体是什么，从句本身不缺成分。' },
+    { type:'clause', sentence:'There is no possibility that he will change his mind.',
+      connOptions:['is','no','possibility','that'], connAnswer:'that',
+      spanOptions:['that he will change his mind','no possibility that','he will change','possibility that he'], spanAnswer:'that he will change his mind',
+      reveal:'There is no possibility <span class="hl-conn">that</span> <span class="hl-clause">he will change his mind</span>.',
+      note:'"possibility" 后接同位语从句说明这种可能性具体指什么。' }
+  ],
+  scenarios:[
+    { prompt:'用 "the news that..." 造一个同位语从句，说一件最近让你意外的消息。', hint:'I heard the news that ...' },
+    { prompt:'用 "the idea that..." 造句，谈一谈你对 "AI 能否取代人类" 这件事的一个想法。', hint:'I don\'t agree with the idea that ...' }
+  ],
+  corrections:[
+    { wrong:'I heard the news which he got the offer.', hint:'同位语从句不缺成分,应该用 that 不用 which' },
+    { wrong:'The fact he was late made everyone angry.', hint:'这里的 that 不能省略,因为不是宾语从句' }
+  ]
+},
+{
+  id:'gentense', title:'一般时态', cat:'时态', color:'red', short:'一般现在/过去/将来',
+  explanation:`
+    <p><b>一般过去时：</b>完全发生在过去。</p>
+    <div class="formula-row">V.(过去式) / did</div>
+    <p><b>一般现在时：</b></p>
+    <div class="formula-row">主语第三人称单数 → V.(第三人称单数) / does　　其他 → V.(原形) / do</div>
+    <p><b>一般将来时：</b></p>
+    <div class="formula-row">will + V.(原形)　　/　　am/is/are going to + V.(原形)</div>
+  `,
+  structure:[
+    { type:'blank', sentence:'She usually ____ up at 7 am.', word:'get',
+      options:['gets','get','got','will get'], answer:'gets',
+      note:'usually 提示一般现在时；主语 she 是第三人称单数，动词加 s。' },
+    { type:'blank', sentence:'They ____ the project last year.', word:'finish',
+      options:['finish','finishes','finished','will finish'], answer:'finished',
+      note:'last year 是明确的过去时间标志，用一般过去时。' },
+    { type:'blank', sentence:'I ____ you tomorrow.', word:'call',
+      options:['call','called','will call','calls'], answer:'will call',
+      note:'tomorrow 是将来时间标志，用一般将来时 will + 动词原形。' }
+  ],
+  scenarios:[
+    { prompt:'用一般将来时(will)造句，说说你明天打算做哪件事来准备雅思。', hint:'Tomorrow, I will ...' },
+    { prompt:'用一般过去时造句，描述你上次考雅思那天发生的一件事。', hint:'On the day of my last IELTS test, ...' }
+  ],
+  corrections:[
+    { wrong:'She go to school every day.', hint:'一般现在时,主语第三人称单数,动词要加 s' },
+    { wrong:'I will going to study tonight.', hint:'will 和 be going to 不能同时用' }
+  ]
+},
+{
+  id:'perfprog', title:'完成时 / 进行时', cat:'时态', color:'teal', short:'have done / be doing',
+  explanation:`
+    <div class="formula-row">现在完成时：have/has + done</div>
+    <div class="formula-row">过去完成时：had + done</div>
+    <div class="formula-row">现在完成进行时：have/has + been doing</div>
+    <div class="formula-row">过去/现在/将来 进行时：be + doing</div>
+    <div class="formula-row">过去将来时：would + V.(原) / was/were going to + V.(原)</div>
+  `,
+  structure:[
+    { type:'blank', sentence:'By the time she arrived, the meeting ____ already.', word:'start',
+      options:['had already started','has already started','already started','starts already'], answer:'had already started',
+      note:'"过去的过去" —— 会议开始在她到达之前，用过去完成时 had done。' },
+    { type:'blank', sentence:'I ____ English for five years.', word:'study',
+      options:['study','studied','have studied','had studied'], answer:'have studied',
+      note:'从过去持续到现在，用现在完成时 have/has done。' },
+    { type:'blank', sentence:'She ____ Korean since 2023, and now she can read a lot.', word:'learn',
+      options:['has learned','has been learning','learned','is learning'], answer:'has been learning',
+      note:'强调"一直在进行的动作"，用现在完成进行时 have/has been doing。' },
+    { type:'blank', sentence:'He said he ____ me the next day.', word:'call',
+      options:['would call','will call','calls','called'], answer:'would call',
+      note:'转述过去说的"将来"的事，用过去将来时 would + 动词原形。' }
+  ],
+  scenarios:[
+    { prompt:'用现在完成时(have/has done)造句,说说你到目前为止为雅思做了哪些准备。', hint:'So far, I have ...' },
+    { prompt:'用过去完成时(had done)造句,描述"在你去考场之前,你已经做了什么准备"。', hint:'Before I went to the test center, I had ...' }
+  ],
+  corrections:[
+    { wrong:'I have finished my homework yesterday.', hint:'现在完成时不能和明确的过去时间(yesterday)连用' },
+    { wrong:'She has been study English for 3 years.', hint:'be+doing 结构里动词要用 -ing 形式' }
+  ]
+},
+{
+  id:'passive', title:'被动语态', cat:'时态', color:'violet', short:'be + done',
+  explanation:`
+    <p><b>构成：</b></p>
+    <div class="formula-row">be + done (过去分词)</div>
+    <p>be 表示被动发生的时间（对应各种时态）并与主语单复数一致；done 是被动承受的动作。</p>
+    <p style="margin-top:10px;">The environment here <b>was changed</b>. / <b>is changed</b>. / <b>will be changed</b>. / <b>would be changed</b>.(过去将来)</p>
+    <p><b>has been changed</b>.(现在完成 - 现在之前已经被改变) / <b>is being changed</b>.(现在正在被改变) / <b>was being changed</b>.(过去正在) / <b>had been changed</b>.(过去完成 - 过去之前已经改变)</p>
+    <p style="margin-top:10px;"><b>与情态动词结合：</b></p>
+    <p>The environment here <b>must be changed</b>. / <b>can be</b> / <b>may be</b> / <b>should be</b> changed.</p>
+  `,
+  structure:[
+    { type:'blank', sentence:'The environment here ____ a lot in the past ten years.', word:'change',
+      options:['has changed','has been changed','changed','is changed'], answer:'has been changed',
+      note:'"过去十年里被改变"——现在完成时的被动语态：has/have been done。' },
+    { type:'blank', sentence:'This problem ____ at the meeting right now.', word:'discuss',
+      options:['is discussing','is being discussed','discussed','was discussed'], answer:'is being discussed',
+      note:'"正在被讨论"——现在进行时的被动语态：is/am/are being done。' },
+    { type:'blank', sentence:'The report must ____ by Friday.', word:'finish',
+      options:['finish','be finished','have finished','finished'], answer:'be finished',
+      note:'情态动词 + 被动语态：must be done。' }
+  ],
+  scenarios:[
+    { prompt:'用被动语态(be+done)造句,说明"这份报告必须在周五之前完成"。', hint:'The report must be ...' },
+    { prompt:'用现在完成被动(has/have been done)造句,谈谈"这个环境问题近年来已经被改善了很多"。', hint:'The problem has been ...' }
+  ],
+  corrections:[
+    { wrong:'The letter was write by him yesterday.', hint:'被动语态里应该用过去分词' },
+    { wrong:'The homework should completed before class.', hint:'情态动词后的被动语态漏了 be' }
+  ]
+}
+];
+
+/* ============================= STORAGE HELPERS ============================= */
+function storageGet(key, fallback){
+  try{
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  }catch(e){ return fallback; }
+}
+function storageSet(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){ console.error('storage set failed', e); }
+}
+
+let STATE = { lastTopicId:null, lastTab:'learn' };
+let PROGRESS = {};
+let WRONGBOOK = [];
+
+/* ============================= AI CONFIG ============================= */
+const PROVIDERS = {
+  deepseek: {
+    label: 'DeepSeek',
+    url: 'https://api.deepseek.com/v1/chat/completions',
+    model: 'deepseek-chat',
+    placeholder: 'your-api-key-here',
+    help: '在 platform.deepseek.com 申请 API Key，便宜量大，国内直连友好。'
+  },
+  zhipu: {
+    label: '智谱 GLM',
+    url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    model: 'glm-4-flash',
+    placeholder: 'xxxxxxxx.xxxxxxxx.xxxxxxxx',
+    help: '在 bigmodel.cn 申请，glm-4-flash 有免费额度。'
+  },
+  qwen: {
+    label: '通义千问 DashScope',
+    url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    model: 'qwen-turbo',
+    placeholder: 'your-api-key-here',
+    help: '在 dashscope.aliyun.com 申请，兼容 OpenAI 格式。'
+  }
+};
+let AI_CFG = { provider:'deepseek', key:'' };
+
+function loadAICfg(){
+  AI_CFG = storageGet('ai-cfg', { provider:'deepseek', key:'' });
+}
+function saveAICfg(){ storageSet('ai-cfg', AI_CFG); }
+
+function aiReady(){ return !!(AI_CFG.key && AI_CFG.key.trim()); }
+
+async function callAI(promptText){
+  if(!aiReady()) throw new Error('NO_KEY');
+  const p = PROVIDERS[AI_CFG.provider];
+  const resp = await fetch(p.url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + AI_CFG.key.trim()
+    },
+    body: JSON.stringify({
+      model: p.model,
+      max_tokens: 1000,
+      temperature: 0.3,
+      messages: [
+        { role:'system', content:'你只输出严格的 JSON 对象，不输出任何其他文字、说明或 markdown 代码块符号。' },
+        { role:'user', content: promptText }
+      ]
+    })
+  });
+  if(!resp.ok){
+    const txt = await resp.text().catch(()=> '');
+    throw new Error('HTTP '+resp.status+' · '+txt.slice(0,200));
+  }
+  const data = await resp.json();
+  const text = (data.choices?.[0]?.message?.content || '').trim();
+  if(!text) throw new Error('EMPTY_RESPONSE');
+  let raw = text.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  return JSON.parse(raw);
+}
+
+function gradeSentencePrompt(topic, scenario, userSentence){
+  return `你是一位耐心但严格的英语语法老师，专门帮中国的雅思学生批改"${topic.title}"的造句练习。
+练习要求：${scenario.prompt}
+学生写的句子：${userSentence}
+
+请只输出一个JSON对象，不要有任何其他文字、说明或markdown代码块符号。JSON格式如下：
+{
+  "correct": true或false（语法和结构是否基本正确，不要过于苛刻，能达意且结构对即可算correct）,
+  "corrected": "如果有错，给出修正后的完整句子；如果本来就正确，原样返回学生的句子",
+  "breakdown": [ {"text":"句子片段", "label":"成分标签，如：主句/连接词/从句主语/从句谓语/从句宾语/系动词/时态标记", "color":"从 purple,pink,blue,green,red,teal,violet,gray 中选一个"} ],
+  "feedback": "简短的中文点评，指出做得好的地方或需要改进的地方，不超过2句话"
+}`;
+}
+
+function gradeCorrectionPrompt(topic, wrongSentence, hint, userFix){
+  return `你是一位耐心但严格的英语语法老师，专门帮中国的雅思学生做"${topic.title}"的纠错练习。
+原始错误句子：${wrongSentence}
+错误提示：${hint}
+学生修改后的句子：${userFix}
+
+请只输出一个JSON对象，不要有任何其他文字、说明或markdown代码块符号。JSON格式如下：
+{
+  "correct": true或false（学生是否已经把原句的语法错误改正确了）,
+  "corrected": "标准的修正后句子",
+  "breakdown": [ {"text":"句子片段", "label":"成分标签", "color":"从 purple,pink,blue,green,red,teal,violet,gray 中选一个"} ],
+  "feedback": "简短中文点评，说明学生改得对不对、哪里还有问题，不超过2句话"
+}`;
+}
+
+function newScenarioPrompt(topic){
+  return `请为中国雅思学生生成一道"${topic.title}"的英语造句练习题（中文场景描述，要求学生用英语造一个包含该语法点的句子）。
+只输出JSON，不要任何其他文字：
+{"prompt":"中文场景描述,50字以内,清楚说明要用什么连接词或时态", "hint":"一个简短的英文句子开头提示"}`;
+}
+function newCorrectionPrompt(topic){
+  return `请为中国雅思学生生成一道"${topic.title}"的英语纠错练习题：写一个包含典型语法错误的英文句子（错误类型要和"${topic.title}"这个语法点相关）。
+只输出JSON，不要任何其他文字：
+{"wrong":"一个包含语法错误的英文句子", "hint":"中文提示,说明错误类型,不超过15字"}`;
+}
+
+/* ============================= APP STATE ============================= */
+function ensureProgress(topicId){
+  if(!PROGRESS[topicId]) PROGRESS[topicId] = { structureDone:[], sentence:{count:0,correct:0}, correction:{count:0,correct:0} };
+  return PROGRESS[topicId];
+}
+async function addWrong(entry){
+  entry.id = 'w'+Date.now()+Math.random().toString(36).slice(2,7);
+  entry.ts = Date.now();
+  WRONGBOOK.unshift(entry);
+  if(WRONGBOOK.length>300) WRONGBOOK = WRONGBOOK.slice(0,300);
+  storageSet('wrongbook', WRONGBOOK);
+}
+
+const app = document.getElementById('app');
+let VIEW = 'home';
+let CURRENT_TOPIC = null;
+let CURRENT_TAB = 'learn';
+
+function topicById(id){ return TOPICS.find(t=>t.id===id); }
+function unreviewedCount(){ return WRONGBOOK.length; }
+
+function boot(){
+  STATE = storageGet('app-state', {lastTopicId:null,lastTab:'learn'});
+  PROGRESS = storageGet('progress', {});
+  WRONGBOOK = storageGet('wrongbook', []);
+  loadAICfg();
+  if(STATE.lastTopicId && topicById(STATE.lastTopicId)){
+    VIEW='topic'; CURRENT_TOPIC = topicById(STATE.lastTopicId); CURRENT_TAB = STATE.lastTab || 'learn';
+  }
+  render();
+}
+function goHome(){ VIEW='home'; CURRENT_TOPIC=null; render(); }
+function openTopic(id, tab){
+  CURRENT_TOPIC = topicById(id); VIEW='topic'; CURRENT_TAB = tab || 'learn';
+  STATE.lastTopicId = id; STATE.lastTab = CURRENT_TAB;
+  storageSet('app-state', STATE);
+  render();
+}
+function switchTab(tab){
+  CURRENT_TAB = tab; STATE.lastTab = tab;
+  storageSet('app-state', STATE);
+  render();
+}
+function openWrongbook(){ VIEW='wrongbook'; render(); }
+function render(){
+  if(VIEW==='home') return renderHome();
+  if(VIEW==='topic') return renderTopic();
+  if(VIEW==='wrongbook') return renderWrongbook();
+}
+
+/* ============================= TOP BAR ============================= */
+function topBarHtml(){
+  const hasKey = aiReady();
+  return `<div class="topbar">
+    <div class="brand"><span class="dot"></span><h1>语法训练营</h1></div>
+    <div class="topbar-actions">
+      <button class="iconbtn" onclick="openAISettings()"><span class="key-dot ${hasKey?'on':''}"></span>AI 设置</button>
+      <button class="iconbtn" onclick="openWrongbook()">错题本 ${unreviewedCount()>0?`<span class="badge">${unreviewedCount()}</span>`:''}</button>
+    </div>
+  </div>`;
+}
+
+/* ============================= HOME ============================= */
+function renderHome(){
+  const cats = ['名词性从句','时态'];
+  let html = topBarHtml();
+  html += `<div class="hero">
+    <h2 style="font-size:18px;">挑一个语法点开始练习</h2>
+    <div class="note">每个语法点都有：讲解 → 结构划分 → 造句 → 纠错，四步练完，进度和错题会自动保存，下次打开接着练。</div>
+  </div>`;
+  if(!aiReady()){
+    html += `<div style="margin:14px 16px 0; padding:12px 14px; border-radius:12px; background:rgba(240,96,61,0.10); border:1px solid rgba(240,96,61,0.3); font-size:13.5px; line-height:1.6;">
+      ⚠️ 还没配置 AI Key，"AI 批改"和"换一题"功能用不了。<b>点右上角"AI 设置"填一个国内大模型的 API Key（推荐 DeepSeek）</b>，填一次会自动保存。
+    </div>`;
+  } else {
+    const p = PROVIDERS[AI_CFG.provider];
+    html += `<div style="margin:14px 16px 0; padding:10px 12px; border-radius:12px; background:rgba(47,174,131,0.10); border:1px solid rgba(47,174,131,0.3); font-size:13px; color:var(--ink-soft);">
+      ✓ 已连接 <b style="color:var(--ink)">${p.label}</b> · Key 末四位：${AI_CFG.key.slice(-4)}
+    </div>`;
+  }
+  cats.forEach(cat=>{
+    html += `<div class="section-label">${cat}</div><div class="cardgrid">`;
+    TOPICS.filter(t=>t.cat===cat).forEach(t=>{
+      const p = ensureProgress(t.id);
+      const totalDone = p.structureDone.length + p.sentence.count + p.correction.count;
+      const dots = [0,1,2,3].map(i=> `<span class="${i < Math.min(4, Math.ceil(totalDone/1.5)) ? 'on':''}" style="color:${COLORS[t.color]}"></span>`).join('');
+      html += `<div class="topic-card" onclick="openTopic('${t.id}')">
+        <div>
+          <div class="chip" style="background:${COLORS[t.color]}">${t.title[0]}</div>
+          <div class="ttl">${t.title}</div>
+          <div class="sub">${t.short}</div>
+        </div>
+        <div class="progress-dots">${dots}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  app.innerHTML = html;
+}
+
+function tabBtn(tab, label){
+  return `<button class="tab ${CURRENT_TAB===tab?'active':''}" onclick="switchTab('${tab}')">${label}</button>`;
+}
+
+function renderTopic(){
+  const t = CURRENT_TOPIC;
+  let html = `<div class="backrow"><button class="backbtn" onclick="goHome()">‹ 返回</button></div>`;
+  html += `<div class="topic-title"><div class="chip-lg" style="background:${COLORS[t.color]}">${t.title[0]}</div><h2>${t.title}</h2></div>`;
+  html += `<div class="tabs">${tabBtn('learn','讲解')}${tabBtn('structure','结构划分')}${tabBtn('sentence','造句')}${tabBtn('correction','纠错')}</div>`;
+  html += `<div class="panel" id="panel"></div>`;
+  app.innerHTML = html;
+  const panel = document.getElementById('panel');
+  if(CURRENT_TAB==='learn') renderLearn(panel, t);
+  if(CURRENT_TAB==='structure') renderStructure(panel, t);
+  if(CURRENT_TAB==='sentence') renderSentence(panel, t);
+  if(CURRENT_TAB==='correction') renderCorrection(panel, t);
+}
+
+function renderLearn(panel, t){
+  panel.innerHTML = `<div class="paper-card">${t.explanation}</div>`;
+}
+
+/* ============================= STRUCTURE ============================= */
+let structIndex = 0;
+let structAnswers = {};
+
+function renderStructure(panel, t){
+  if(structIndex >= t.structure.length) structIndex = 0;
+  const q = t.structure[structIndex];
+  const p = ensureProgress(t.id);
+  const key = t.id+'-'+structIndex;
+  const st = structAnswers[key] || {};
+  let html = `<div class="qlabel">结构划分 · 第 ${structIndex+1}/${t.structure.length} 题 ${p.structureDone.includes(structIndex)?'✓已完成':''}</div>`;
+  html += `<div class="qsentence">${q.sentence}</div>`;
+
+  if(q.type==='clause'){
+    html += `<div class="qlabel">① 这句话的连接词（引导词）是哪个？</div><div class="opt-grid">`;
+    q.connOptions.forEach(opt=>{
+      let cls='opt';
+      if(st.connChosen){
+        if(opt===q.connAnswer) cls+=' correct';
+        else if(opt===st.connChosen) cls+=' wrong';
+      }
+      html += `<button class="${cls}" ${st.connChosen?'disabled':''} onclick="pickConn('${t.id}',${structIndex},'${opt.replace(/'/g,"\\'")}')">${opt}</button>`;
+    });
+    html += `</div>`;
+
+    if(st.connChosen){
+      html += `<div class="qlabel">② 从句的完整范围是？</div><div class="opt-grid">`;
+      q.spanOptions.forEach(opt=>{
+        let cls='opt';
+        if(st.spanChosen){
+          if(opt===q.spanAnswer) cls+=' correct';
+          else if(opt===st.spanChosen) cls+=' wrong';
+        }
+        html += `<button class="${cls}" ${st.spanChosen?'disabled':''} onclick="pickSpan('${t.id}',${structIndex},'${opt.replace(/'/g,"\\'")}')">${opt}</button>`;
+      });
+      html += `</div>`;
+    }
+    if(st.spanChosen){
+      html += `<div class="reveal-box"><b>解析：</b><br>${q.reveal}<br><span style="color:var(--ink-soft); font-size:13px;">${q.note}</span></div>`;
+    }
+  } else if(q.type==='blank'){
+    html += `<div class="qlabel">选择正确的时态形式</div><div class="opt-grid">`;
+    q.options.forEach(opt=>{
+      let cls='opt';
+      if(st.chosen){
+        if(opt===q.answer) cls+=' correct';
+        else if(opt===st.chosen) cls+=' wrong';
+      }
+      html += `<button class="${cls}" ${st.chosen?'disabled':''} onclick="pickBlank('${t.id}',${structIndex},'${opt.replace(/'/g,"\\'")}')">${opt}</button>`;
+    });
+    html += `</div>`;
+    if(st.chosen){
+      html += `<div class="reveal-box"><b>解析：</b><br>${q.note}</div>`;
+    }
+  }
+
+  html += `<div class="row-btns">
+    <button class="btn btn-ghost" onclick="prevStruct('${t.id}')">‹ 上一题</button>
+    <button class="btn btn-primary" onclick="nextStruct('${t.id}')">下一题 ›</button>
+  </div>`;
+  panel.innerHTML = html;
+}
+
+function pickConn(topicId, idx, val){
+  const t = topicById(topicId); const q = t.structure[idx]; const key=topicId+'-'+idx;
+  structAnswers[key] = structAnswers[key] || {};
+  structAnswers[key].connChosen = val;
+  if(val !== q.connAnswer){
+    addWrong({ topicId, topicTitle:t.title, color:t.color, kind:'结构划分', question:q.sentence+'（连接词）', userAnswer:val, correctAnswer:q.connAnswer, note:q.note });
+  }
+  render();
+}
+function pickSpan(topicId, idx, val){
+  const t = topicById(topicId); const q = t.structure[idx]; const key=topicId+'-'+idx;
+  structAnswers[key] = structAnswers[key] || {};
+  structAnswers[key].spanChosen = val;
+  const p = ensureProgress(topicId);
+  if(val !== q.spanAnswer){
+    addWrong({ topicId, topicTitle:t.title, color:t.color, kind:'结构划分', question:q.sentence+'（从句范围）', userAnswer:val, correctAnswer:q.spanAnswer, note:q.note });
+  } else if(!p.structureDone.includes(idx)){
+    p.structureDone.push(idx); storageSet('progress', PROGRESS);
+  }
+  render();
+}
+function pickBlank(topicId, idx, val){
+  const t = topicById(topicId); const q = t.structure[idx]; const key=topicId+'-'+idx;
+  structAnswers[key] = structAnswers[key] || {};
+  structAnswers[key].chosen = val;
+  const p = ensureProgress(topicId);
+  if(val !== q.answer){
+    addWrong({ topicId, topicTitle:t.title, color:t.color, kind:'结构划分', question:q.sentence, userAnswer:val, correctAnswer:q.answer, note:q.note });
+  } else if(!p.structureDone.includes(idx)){
+    p.structureDone.push(idx); storageSet('progress', PROGRESS);
+  }
+  render();
+}
+function prevStruct(topicId){ structIndex = Math.max(0, structIndex-1); render(); }
+function nextStruct(topicId){ const t=topicById(topicId); structIndex = Math.min(t.structure.length-1, structIndex+1); render(); }
+
+/* ============================= SENTENCE ============================= */
+let sentenceState = {};
+
+function renderSentence(panel, t){
+  const s = sentenceState[t.id] || (sentenceState[t.id] = { current: t.scenarios[0], loading:false, result:null, userText:'' });
+  let html = `<div class="scenario-card">
+    <div class="lbl">练习场景</div>
+    <div class="prompt">${s.current.prompt}</div>
+    <div class="hint">💡 ${s.current.hint}</div>
+  </div>`;
+  html += `<textarea id="sentInput" placeholder="用英语写下你的句子…">${s.userText||''}</textarea>`;
+  html += `<div class="row-btns">
+    <button class="btn btn-primary" id="gradeBtn" onclick="gradeSentence('${t.id}')">${s.loading?'<span class="spinner"></span>批改中…':'AI 批改'}</button>
+    <button class="btn btn-ghost" onclick="newSentenceItem('${t.id}')">换一题</button>
+  </div>`;
+  if(s.result){ html += renderFeedbackBox(s.result); }
+  panel.innerHTML = html;
+  const ta = document.getElementById('sentInput');
+  if(ta) ta.addEventListener('input', (e)=>{ s.userText = e.target.value; });
+}
+
+function renderFeedbackBox(r){
+  let html = `<div class="feedback-box ${r.correct?'good':'bad'}">
+    <div class="feedback-title">${r.correct?'✓ 结构基本正确':'✗ 还需要调整'}</div>`;
+  if(r.breakdown && r.breakdown.length){
+    html += `<div style="margin:6px 0;">`;
+    r.breakdown.forEach(b=>{
+      const c = COLORS[b.color] || COLORS.gray;
+      html += `<span class="chip-pill" style="background:${c}">${b.text} · ${b.label}</span>`;
+    });
+    html += `</div>`;
+  }
+  if(r.feedback) html += `<div class="feedback-line">${r.feedback}</div>`;
+  if(r.corrected) html += `<div class="corrected-line">参考：${r.corrected}</div>`;
+  html += `</div>`;
+  return html;
+}
+
+async function gradeSentence(topicId){
+  const t = topicById(topicId);
+  const s = sentenceState[t.id];
+  const input = document.getElementById('sentInput').value.trim();
+  if(!input) return;
+  if(!aiReady()){
+    openAISettings();
+    s.result = { correct:false, feedback:'还没配置 AI Key，请先在"AI 设置"里填一个国内大模型的 API Key。', breakdown:[], corrected:'' };
+    render();
+    return;
+  }
+  s.loading = true; render();
+  try{
+    const result = await callAI(gradeSentencePrompt(t, s.current, input));
+    s.result = result; s.loading=false;
+    const p = ensureProgress(topicId);
+    p.sentence.count++;
+    if(result.correct) p.sentence.correct++;
+    storageSet('progress', PROGRESS);
+    if(!result.correct){
+      addWrong({ topicId, topicTitle:t.title, color:t.color, kind:'造句', question:s.current.prompt, userAnswer:input, correctAnswer:result.corrected, note:result.feedback });
+    }
+    render();
+  }catch(e){
+    s.loading=false;
+    let msg = '批改失败：'+(e.message||e);
+    if(e.message==='NO_KEY') msg = '还没配置 AI Key。';
+    s.result = { correct:false, feedback:msg+'（提示：国内大模型通常可直接浏览器调用；如果报"网络/CORS 错误"，换个厂商试试。）', breakdown:[], corrected:'' };
+    render();
+  }
+}
+
+async function newSentenceItem(topicId){
+  const t = topicById(topicId);
+  const s = sentenceState[t.id];
+  if(!aiReady()){
+    openAISettings();
+    const idx = t.scenarios.indexOf(s.current);
+    s.current = t.scenarios[(idx+1) % t.scenarios.length];
+    s.userText=''; render();
+    return;
+  }
+  s.loading = true; s.result=null; render();
+  try{
+    const item = await callAI(newScenarioPrompt(t));
+    s.current = { prompt: item.prompt, hint: item.hint };
+    s.userText = ''; s.loading=false;
+    render();
+  }catch(e){
+    const idx = t.scenarios.indexOf(s.current);
+    s.current = t.scenarios[(idx+1) % t.scenarios.length];
+    s.userText=''; s.loading=false;
+    render();
+  }
+}
+
+/* ============================= CORRECTION ============================= */
+let correctionState = {};
+
+function renderCorrection(panel, t){
+  const s = correctionState[t.id] || (correctionState[t.id] = { current: t.corrections[0], loading:false, result:null, userText:'' });
+  if(s.userText === '' && !s.touched){ s.userText = s.current.wrong; s.touched = true; }
+  let html = `<div class="scenario-card">
+    <div class="lbl">找出并修改错误</div>
+    <div class="prompt mono" style="font-style:italic;">"${s.current.wrong}"</div>
+    <div class="hint">💡 提示：${s.current.hint}</div>
+  </div>`;
+  html += `<textarea id="corrInput">${s.userText}</textarea>`;
+  html += `<div class="row-btns">
+    <button class="btn btn-primary" onclick="gradeCorrection('${t.id}')">${s.loading?'<span class="spinner"></span>检查中…':'AI 检查'}</button>
+    <button class="btn btn-ghost" onclick="newCorrectionItem('${t.id}')">换一题</button>
+  </div>`;
+  if(s.result){ html += renderFeedbackBox(s.result); }
+  panel.innerHTML = html;
+  const ta = document.getElementById('corrInput');
+  if(ta) ta.addEventListener('input', (e)=>{ s.userText = e.target.value; });
+}
+
+async function gradeCorrection(topicId){
+  const t = topicById(topicId);
+  const s = correctionState[t.id];
+  const input = document.getElementById('corrInput').value.trim();
+  if(!input) return;
+  if(!aiReady()){
+    openAISettings();
+    s.result = { correct:false, feedback:'还没配置 AI Key，请先在"AI 设置"里填一个国内大模型的 API Key。', breakdown:[], corrected:'' };
+    render();
+    return;
+  }
+  s.loading = true; render();
+  try{
+    const result = await callAI(gradeCorrectionPrompt(t, s.current.wrong, s.current.hint, input));
+    s.result = result; s.loading=false;
+    const p = ensureProgress(topicId);
+    p.correction.count++;
+    if(result.correct) p.correction.correct++;
+    storageSet('progress', PROGRESS);
+    if(!result.correct){
+      addWrong({ topicId, topicTitle:t.title, color:t.color, kind:'纠错', question:s.current.wrong, userAnswer:input, correctAnswer:result.corrected, note:result.feedback });
+    }
+    render();
+  }catch(e){
+    s.loading=false;
+    let msg = '检查失败：'+(e.message||e);
+    if(e.message==='NO_KEY') msg = '还没配置 AI Key。';
+    s.result = { correct:false, feedback:msg, breakdown:[], corrected:'' };
+    render();
+  }
+}
+
+async function newCorrectionItem(topicId){
+  const t = topicById(topicId);
+  const s = correctionState[t.id];
+  if(!aiReady()){
+    openAISettings();
+    const idx = t.corrections.indexOf(s.current);
+    s.current = t.corrections[(idx+1) % t.corrections.length];
+    s.userText = s.current.wrong; s.touched = true; render();
+    return;
+  }
+  s.loading = true; s.result=null; render();
+  try{
+    const item = await callAI(newCorrectionPrompt(t));
+    s.current = { wrong: item.wrong, hint: item.hint };
+    s.userText = item.wrong; s.touched = true; s.loading=false;
+    render();
+  }catch(e){
+    const idx = t.corrections.indexOf(s.current);
+    s.current = t.corrections[(idx+1) % t.corrections.length];
+    s.userText = s.current.wrong; s.touched = true; s.loading=false;
+    render();
+  }
+}
+
+/* ============================= WRONGBOOK ============================= */
+function renderWrongbook(){
+  let html = `<div class="backrow"><button class="backbtn" onclick="goHome()">‹ 返回</button></div>`;
+  html += `<div class="topic-title"><h2>错题本</h2></div>`;
+  if(WRONGBOOK.length===0){
+    html += `<div class="empty">还没有错题，继续加油练习吧 📖</div>`;
+  } else {
+    html += `<div class="clear-row"><button class="small-link" onclick="clearWrongbook()">清空全部</button></div>`;
+    html += `<div class="panel">`;
+    WRONGBOOK.forEach(w=>{
+      const c = COLORS[w.color] || COLORS.gray;
+      const d = new Date(w.ts);
+      const dstr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      html += `<div class="errbook-item">
+        <div class="meta">
+          <span class="topictag" style="background:${c}">${w.topicTitle} · ${w.kind}</span>
+          <span class="ts">${dstr}</span>
+        </div>
+        <div class="q">${w.question}</div>
+        <div class="a">你的答案：${w.userAnswer||'—'}</div>
+        <div class="a">正确答案/参考：${w.correctAnswer||'—'}</div>
+        ${w.note?`<div class="a">说明：${w.note}</div>`:''}
+        <div class="row-btns"><button class="small-link" onclick="removeWrong('${w.id}')">移除这条</button></div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  app.innerHTML = html;
+}
+
+function removeWrong(id){
+  WRONGBOOK = WRONGBOOK.filter(w=>w.id!==id);
+  storageSet('wrongbook', WRONGBOOK);
+  render();
+}
+function clearWrongbook(){
+  WRONGBOOK = [];
+  storageSet('wrongbook', WRONGBOOK);
+  render();
+}
+
+/* ============================= AI SETTINGS MODAL ============================= */
+function openAISettings(){
+  const p = PROVIDERS[AI_CFG.provider] || PROVIDERS.deepseek;
+  let html = `<div class="modal-mask" onclick="if(event.target===this)closeModal()">
+    <div class="modal" style="position:relative;">
+      <button class="close-x" onclick="closeModal()">×</button>
+      <h3>⚙️ AI 设置</h3>
+      <div class="sub">选择一个国内大模型厂商，把 API Key 填进去。每次批改都会用这个 Key 调用，Key 仅保存在你本机浏览器（localStorage），不会传到任何服务器。</div>
+
+      <label>厂商</label>
+      <div class="provider-pick">
+        ${Object.entries(PROVIDERS).map(([k,v])=>`<div class="pchip ${AI_CFG.provider===k?'active':''}" onclick="pickProvider('${k}')">${v.label}</div>`).join('')}
+      </div>
+
+      <div class="field">
+        <label>API Key</label>
+        <input type="password" id="aiKeyInput" placeholder="${p.placeholder}" value="${AI_CFG.key||''}" autocomplete="off" />
+        <div class="hint" style="margin-top:6px;">📖 ${p.help}</div>
+      </div>
+
+      <div id="aiStatus" class="status idle">未测试</div>
+
+      <div class="row-btns">
+        <button class="btn btn-primary" onclick="saveAndTest()">保存并测试</button>
+        <button class="btn btn-ghost" onclick="clearKey()">清空 Key</button>
+        <button class="btn btn-ghost" onclick="closeModal()">关闭</button>
+      </div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.id = 'modal-root';
+  document.body.appendChild(div);
+}
+
+function closeModal(){
+  const m = document.getElementById('modal-root');
+  if(m) m.remove();
+}
+
+function pickProvider(k){
+  AI_CFG.provider = k;
+  const p = PROVIDERS[k];
+  document.querySelectorAll('.pchip').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('aiKeyInput').placeholder = p.placeholder;
+}
+
+async function saveAndTest(){
+  const k = document.getElementById('aiKeyInput').value.trim();
+  const statusEl = document.getElementById('aiStatus');
+  if(!k){ statusEl.className='status err'; statusEl.textContent='Key 不能为空'; return; }
+  AI_CFG.key = k;
+  saveAICfg();
+  statusEl.className='status idle'; statusEl.innerHTML='<span class="spinner"></span>正在测试连接…';
+  try{
+    const r = await callAI('请只输出这个 JSON：{"ok":true}');
+    statusEl.className='status ok';
+    statusEl.textContent = '✓ 连接成功！'+(r.ok?' 模型已就绪。':' 收到响应但格式异常。');
+    setTimeout(()=>{ closeModal(); render(); }, 800);
+  }catch(e){
+    statusEl.className='status err';
+    statusEl.innerHTML = '✗ 连接失败：'+(e.message||e)+'<br><span style="font-size:12px;">常见原因：Key 错误 / 余额不足 / 浏览器 CORS（极少数情况，可换厂商）</span>';
+  }
+}
+
+function clearKey(){
+  AI_CFG.key = '';
+  saveAICfg();
+  closeModal();
+  render();
+}
+
+/* ============================= INIT ============================= */
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI电影情绪创作工作台</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3edff;--fg:#1a1033;--mut:#6b5a8f;--card:#fff;--bd:#1a1033;--ink:#1a1033;--ac:#7c3aed;--pop:#ffd23f;--ok:#2e7d4f;--warn:#c2410c;--dot:rgba(124,58,237,.16);--tint:#efe7ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#140d24;--fg:#f1eaff;--mut:#a595c9;--card:#1f1535;--bd:#9a7cf0;--ink:#9a7cf0;--ac:#8b5cf6;--pop:#ffd23f;--ok:#5cb884;--warn:#fb923c;--dot:rgba(167,139,250,.14);--tint:#2a1c4a}}
+:root[data-theme="dark"]{--bg:#140d24;--fg:#f1eaff;--mut:#a595c9;--card:#1f1535;--bd:#9a7cf0;--ink:#9a7cf0;--ac:#8b5cf6;--pop:#ffd23f;--ok:#5cb884;--warn:#fb923c;--dot:rgba(167,139,250,.14);--tint:#2a1c4a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0 auto;background:var(--bg);background-image:radial-gradient(var(--dot) 1.2px,transparent 1.6px);background-size:11px 11px;color:var(--fg);font:15px/1.6 -apple-system,"PingFang SC","Noto Sans SC",sans-serif;max-width:720px;padding:14px}
+h1{font:400 24px/1.2 "Bangers","PingFang SC","Noto Sans SC",sans-serif;letter-spacing:1.5px;margin:4px 0 14px;color:var(--ac);text-shadow:2px 2px 0 var(--ink)}
+h1 .note{font:12px -apple-system,"PingFang SC",sans-serif;letter-spacing:0;text-shadow:none;color:var(--mut)}
+nav{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding:2px 4px 6px 2px}
+nav button{flex:none}
+button{font:inherit;font-weight:600;padding:7px 12px;border:2px solid var(--ink);background:var(--card);color:var(--fg);border-radius:6px;box-shadow:2px 2px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+button:active:not(:disabled){transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+button.on{background:var(--pop);color:#1a1033}
+button.pri{background:var(--ac);color:#fff}
+button:disabled{opacity:.4;box-shadow:none}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:12px;margin-bottom:16px;box-shadow:5px 5px 0 var(--ac)}
+.card h3{margin:0 0 8px;font-size:13px;letter-spacing:.5px;color:#fff;background:var(--ink);display:inline-block;padding:2px 10px;border-radius:4px;transform:rotate(-1deg)}
+.card.intent{background:var(--tint);box-shadow:5px 5px 0 var(--pop)}
+textarea,input{width:100%;font:inherit;padding:8px;border:2px solid var(--ink);border-radius:6px;background:var(--bg);color:var(--fg)}
+textarea:focus,input:focus{outline:none;box-shadow:3px 3px 0 var(--ac)}
+textarea{min-height:140px}
+pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:2px dashed var(--ink);border-radius:6px;padding:8px;max-height:220px;overflow:auto;font-size:13px;margin:6px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tag{font-size:12px;font-weight:600;padding:1px 8px;border-radius:4px;border:1.5px solid var(--ink);background:var(--card);color:var(--mut)}
+.tag.lock{color:var(--ok);border-color:var(--ok)}.tag.warn{color:var(--warn);border-color:var(--warn);background:var(--pop);color:#7c2d12}
+.ver{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:2px dotted var(--ink);font-size:13px}
+details.ver summary{cursor:pointer;font-weight:600}
+label{font-size:13px;font-weight:600;color:var(--ac);display:block;margin-top:10px}
+.note{font-size:12px;color:var(--mut)}
+</style></head><body>
+<h1>🎬 AI电影情绪创作工作台 <span class="note">V2 · 前置+视觉前期</span></h1>
+<nav id="nav"></nav><div id="main"></div>
+<script>
+const ROLES={
+intent:{name:"原始意图"},
+map:{name:"意图地图",fields:"Theme / Core Emotion / Character Need / Conflict / Desired Audience Experience / Visual Motifs",
+rule:"你是意图提取员。只从【原始意图】与【原始想法】中提取创作者真正不能丢掉的东西，不写故事，不添加创作者没有表达的内容。无法确定的项标注“（待用户确认）”。“观众体验”要写成具体的观看体验，不要用“她很孤独”这类抽象形容词。"},
+story:{name:"编剧",fields:"Story Premise / Logline / Theme / Character / Character Goal / Character Need / Conflict / Internal Conflict / External Conflict / Behavioral Contradiction / Story Structure / Scene List / Emotional Arc / Information Progression / Visual Motifs / Ending\n其中 Scene List 必须拆成 Scene 01、Scene 02……，每个 Scene 包含：Scene ID、Location、Time、Characters、What happens、Story Function、Emotional Function、Character State、Cause、Consequence",
+rule:"你是编剧。严格服务于原始意图与意图地图，把想法写成具有电影叙事能力的故事。理解主题、表层目标与深层需求、欲望、阻碍、内外冲突、人物矛盾、情绪变化、行为原因、信息递进。禁止只用抽象心理形容词推动故事，必须追问：为什么、如何隐藏、导致什么行为、观众如何从行为中发现。"},
+psych:{name:"心理导演",fields:"Character / Surface Emotion / Hidden Emotion / Core Desire / Core Fear / True Need / Defense Mechanism / Self Perception / Perception of Others / Behavioral Contradiction / Triggers / Emotional Progression / Body Response / Behavior / Attention / Spatial Behavior / Behavioral Translation\n其中 Behavioral Translation 要把心理逐步翻译成：身体→行为→注意力→空间→视觉，每一步都是可观察的",
+rule:"你是心理导演，只为故事人物建模，不诊断现实中的人。核心工作：心理→身体→行为→空间→视觉→声音。禁止把“她很孤独/焦虑/绝望”作为最终结果，必须推导成可被看见的行为（如：仍在固定时间查看手机，但不再打开聊天窗口）。"},
+dir:{name:"导演",fields:"Directorial Concept / Audience Experience / Dramatic Focus / What The Audience Knows / What The Character Knows / What Should Be Withheld / Visual Strategy / Emotional Strategy / Spatial Strategy / Camera Philosophy / Pacing Philosophy / Visual Motifs / What NOT To Show / Key Dramatic Moments / Shot Existence Criteria\n其中 Shot Existence Criteria 说明未来每个镜头都必须回答 Why does this shot exist：Story Function、Emotional Function、Character Function、Information Function、Transition Function 各指什么",
+rule:"你是导演。心理导演回答“人物内部发生了什么”，你回答“我要让观众如何经历这件事”。你做的是视觉叙事决策，不是分镜。必须明确什么不该直接拍（What NOT To Show），例如不直接拍哭，而让观众通过重复行为的变化发现她已经知道答案。不要写具体镜头，不要堆电影术语。"},
+board:{name:"分镜",fields:"每个镜头一个块，字段名必须用英文原名，每个字段独占一行：\n### Shot 01\nScene ID: \nStory Function: \nEmotional Function: \nInformation Function: \nCharacter State: \nAction: \nBlocking: \nEnvironment: \nShot Size: \nCamera Position: \nComposition: \nCamera Movement: \nLighting: \nDuration: （秒，纯数字）\nTransition: \nPrevious Shot: （第一镜写 None）\nNext Shot: （最后一镜写 None）",
+rule:"你是分镜导演。把导演策略转成连续的镜头链（Shot Chain），不是单张漂亮画面。每个镜头必须回答 Why does this shot exist，至少承担一个故事/情绪/人物/信息功能，并写清与前后镜头的关系。严格遵守导演的 What NOT To Show。单镜头时长不得超过 {MAXDUR} 秒（视频模型限制）。不要为了好看而加镜头。"},
+cine:{name:"摄影",fields:"对分镜中的每个 Shot（沿用同一个 Shot ID）输出一个块，字段名用英文原名：\n### Shot 01\nLens: \nCamera Height: \nCamera Distance: \nShot Size: \nComposition: \nPerspective: \nDepth of Field: \nForeground: \nBackground: \nLighting: \nColor Temperature: \nCamera Movement: \nWhy This Camera: （必须写叙事或情绪理由）",
+rule:"你是摄影指导，不改写故事。每个摄影决定都要有叙事或情绪理由，写在 Why This Camera。禁止堆 cinematic、beautiful、dramatic、film look 这类空词，不要因为“电影感”而用电影语言。必须覆盖分镜里的每一个镜头。"},
+art:{name:"美术",fields:"World / Location / Architecture / Furniture / Props / Materials / Lighting Environment / Color / Texture / Time / Signs of Life / Environmental Change / Spatial Anchor / Visual Continuity Rules\n其中 Spatial Anchor 写清空间布局和固定方位（门、窗、固定座位的位置关系），所有镜头共用",
+rule:"你是美术指导。建立所有镜头共用的视觉世界（Visual Bible），环境要能承载人物状态，不是单纯好看。重点防止镜头之间房间变样、道具消失。"},
+char:{name:"角色",fields:"每个角色一段，包含：Character ID / Name / Age / Face / Hair / Body / Skin / Clothing / Shoes / Accessories / Color / Expression / Typical Pose / Reference Images / Consistency Rules",
+rule:"你是角色设计，输出 Character Bible，保证同一角色在所有镜头里一致。外观描述要具体可视（能直接用于图像生成），不写抽象性格形容词。Consistency Rules 写清哪些特征绝不能变。Reference Images 只写需要哪些参考图，不要编造链接。"}};
+const ORDER=["intent","map","story","psych","dir","board","cine","art","char"],DEPS={intent:[],map:["intent"],story:["map"],psych:["story"],dir:["story","psych"],board:["dir"],cine:["board"],art:["dir"],char:["psych"]},CTX={intent:[],map:[],story:[],psych:["map"],dir:["map"],board:["story"],cine:["dir"],art:["story"],char:["art"]};
+const BLK={board:["Scene ID","Story Function","Emotional Function","Information Function","Action","Shot Size","Duration","Previous Shot","Next Shot"],cine:["Lens","Shot Size","Composition","Lighting","Camera Movement","Why This Camera"]};
+const SCHEMA={
+map:[["Theme","主题"],["Core Emotion","核心情绪"],["Character Need","人物核心需求","人物需求"],["Conflict","核心冲突","冲突"],["Desired Audience Experience","观众体验","希望观众"],["Visual Motifs","视觉母题"]],
+story:[["Story Premise","故事前提"],["Logline","一句话"],["Theme","主题"],["Character","人物"],["Character Goal","人物目标"],["Character Need","人物需求"],["Conflict","冲突"],["Internal Conflict","内在冲突","内部冲突"],["External Conflict","外在冲突","外部冲突"],["Behavioral Contradiction","行为矛盾"],["Story Structure","故事结构"],["Scene List","场景列表"],["Emotional Arc","情绪弧"],["Information Progression","信息递进"],["Visual Motifs","视觉母题"],["Ending","结局"]],
+psych:[["Character","人物"],["Surface Emotion","表层情绪"],["Hidden Emotion","隐藏情绪"],["Core Desire","核心欲望"],["Core Fear","核心恐惧"],["True Need","真正需求"],["Defense Mechanism","心理防御"],["Self Perception","自我认知"],["Perception of Others","他人认知"],["Behavioral Contradiction","行为矛盾"],["Triggers","触发点"],["Emotional Progression","情绪递进"],["Body Response","身体反应"],["Behavior","行为"],["Attention","注意力"],["Spatial Behavior","空间行为"],["Behavioral Translation","行为翻译"]],
+dir:[["Directorial Concept","导演概念"],["Audience Experience","观众体验"],["Dramatic Focus","戏剧焦点"],["What The Audience Knows","观众知道"],["What The Character Knows","人物知道"],["What Should Be Withheld","应当保留","隐瞒"],["Visual Strategy","视觉策略"],["Emotional Strategy","情绪策略"],["Spatial Strategy","空间策略"],["Camera Philosophy","摄影理念","镜头理念"],["Pacing Philosophy","节奏理念"],["Visual Motifs","视觉母题"],["What NOT To Show","不应直接呈现","不要直接拍"],["Key Dramatic Moments","关键戏剧时刻"],["Shot Existence Criteria","镜头存在依据"]],
+art:[["World","世界"],["Location","地点"],["Architecture","建筑"],["Furniture","家具"],["Props","道具"],["Materials","材质"],["Lighting Environment","光线环境"],["Color","色彩"],["Texture","质感"],["Time","时间"],["Signs of Life","生活痕迹"],["Environmental Change","环境变化"],["Spatial Anchor","空间锚点"],["Visual Continuity Rules","视觉连续性规则","连续性规则"]],
+char:[["Character ID","角色ID"],["Name","姓名"],["Age","年龄"],["Face","面部"],["Hair","发型"],["Body","体型"],["Skin","皮肤"],["Clothing","服装"],["Shoes","鞋"],["Accessories","配饰"],["Color","色彩"],["Expression","表情"],["Typical Pose","典型姿态"],["Reference Images","参考图"],["Consistency Rules","一致性规则"]]};
+const LK={none:"无锁",soft:"软锁",hard:"硬锁"};
+const TABS=[["core","项目"],["intent","想法/意图"],["map","意图地图"],["story","故事"],["psych","心理"],["dir","导演"],["board","分镜"],["cine","摄影"],["art","美术"],["char","角色"],["set","设置"]];
+let tab="core",VMSG={},S=load();
+function blank(){const a={},c={},d={},f={};ORDER.forEach(k=>{a[k]=[];c[k]=-1;d[k]="";f[k]={}});return{idea:"",art:a,cur:c,draft:d,cfg:f,maxDur:8}}
+function load(){try{const s=localStorage.getItem("fw3");if(s)return fix(JSON.parse(s));
+ const o=localStorage.getItem("fw2");if(o){const x=JSON.parse(o),n=blank();n.idea=x.intent||"";["story","psych"].forEach(k=>{n.art[k]=x.art[k];n.cur[k]=x.cur[k];n.draft[k]=x.draft[k];n.cfg[k]=x.cfg[k]||{}});
+  if(x.intentSaved){n.art.intent=[{id:"intent_v1",type:"intent",version:1,status:"confirmed",createdAt:"迁移",basedOn:{},lock:"hard",valid:true,content:x.intent}];n.cur.intent=0;n.draft.intent=x.intent}return n}}catch(e){}return blank()}
+function fix(x){ORDER.forEach(k=>{x.art[k]=x.art[k]||[];if(x.cur[k]==null)x.cur[k]=-1;x.draft[k]=x.draft[k]||"";x.cfg[k]=x.cfg[k]||{}});x.maxDur=x.maxDur||8;return x}
+function save(){try{localStorage.setItem("fw3",JSON.stringify(S))}catch(e){}}
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+const curA=k=>S.cur[k]>=0?S.art[k][S.cur[k]]:null;
+function isStale(k){const a=curA(k);if(!a)return false;return DEPS[k].some(d=>{const u=curA(d);return u&&(a.basedOn[d]!==u.version||isStale(d))})}
+function reason(k){const a=curA(k);return DEPS[k].map(d=>{const u=curA(d);if(!u)return"";return a.basedOn[d]!==u.version?ROLES[d].name+"已更新到V"+u.version+"，本版基于V"+a.basedOn[d]:isStale(d)?ROLES[d].name+"本身已过期":""}).filter(Boolean).join("；")}
+const norm=s=>s.toLowerCase().replace(/[\s_\-·/:：*#]/g,"");
+function validate(k,t){if(BLK[k])return vBlk(k,t);const L=t.split("\n").map(l=>norm(l.replace(/^[\s#*\-\d.、)）（(]+/,"")));
+ const m=SCHEMA[k].filter(al=>!al.some(a=>L.some(l=>l.startsWith(norm(a))))).map(a=>a[0]);
+ if(k==="story"&&!/(scene|场景)\s*0?1/i.test(t))m.push("Scene List 需拆成 Scene 01、Scene 02…");return m}
+function parseBlocks(t){const B=[],H=[];let c=null;
+ t.split("\n").forEach(l=>{const m=l.match(/^[\s#*\-]*shot\s*0*(\d+)\b/i);
+  if(m){c={id:m[1].padStart(2,"0"),raw:[l],f:{}};B.push(c)}
+  else if(c){c.raw.push(l);const kv=l.replace(/\*\*/g,"").replace(/^[\s#\-]+/,"").match(/^([A-Za-z][A-Za-z ']{1,40})\s*[:：]\s*(.+)/);if(kv)c.f[norm(kv[1])]=kv[2].trim()}
+  else H.push(l)});
+ B.forEach(b=>b.raw=b.raw.join("\n"));return{head:H.join("\n"),blocks:B}}
+function vBlk(k,t){const P=parseBlocks(t),m=[];if(!P.blocks.length)return["未识别到“### Shot 01”形式的镜头块"];
+ P.blocks.forEach(b=>{const x=BLK[k].filter(f=>!b.f[norm(f)]);if(x.length)m.push("Shot "+b.id+" 缺 "+x.join("、"));
+  if(k==="board"){const d=parseFloat(b.f.duration);if(d>S.maxDur)m.push("Shot "+b.id+" 时长"+d+"秒，超过上限"+S.maxDur+"秒")}});
+ const bd=curA("board");if(k==="cine"&&bd){const h=P.blocks.map(b=>b.id),w=parseBlocks(bd.content).blocks.map(b=>b.id);
+  w.filter(i=>!h.includes(i)).forEach(i=>m.push("缺少 Shot "+i+" 的摄影设计"));h.filter(i=>!w.includes(i)).forEach(i=>m.push("Shot "+i+" 不在分镜中"))}
+ return m}
+function keepLocked(k,t,c){if(!BLK[k]||!c||!c.sl)return t;const ids=Object.keys(c.sl).filter(i=>c.sl[i]);if(!ids.length)return t;
+ const O=parseBlocks(c.content).blocks,P=parseBlocks(t);
+ ids.forEach(i=>{const o=O.find(b=>b.id===i);if(!o)return;const j=P.blocks.findIndex(b=>b.id===i);if(j>=0)P.blocks[j]=o;else P.blocks.push(o)});
+ P.blocks.sort((a,b)=>a.id-b.id);return[P.head].concat(P.blocks.map(b=>b.raw)).join("\n").trim()}
+function cardsHTML(k){const c=curA(k);if(!c)return"";const P=parseBlocks(c.content);if(!P.blocks.length)return"";const sl=c.sl||{};
+ const tot=P.blocks.reduce((a,b)=>a+(parseFloat(b.f.duration)||0),0);
+ return`<div class="card"><h3>镜头卡片 · ${P.blocks.length}个镜头${k==="board"?" · 合计"+tot+"秒":""}</h3>`+P.blocks.map(b=>`<details class="ver" style="display:block"><summary>Shot ${b.id} ${sl[b.id]?"🔒":""} <span class="note">${esc((b.f.action||b.f.whythiscamera||"").slice(0,40))}</span></summary><pre>${esc(b.raw)}</pre><div class="row"><button ${c.lock==="hard"?"disabled":""} onclick="togShot('${k}','${b.id}')">${sl[b.id]?"解锁镜头":"锁定镜头"}</button><button onclick="copy(shotPrompt('${k}','${b.id}'),this)">复制单镜头重写提示词</button></div></details>`).join("")+`</div>`}
+function togShot(k,id){const c=curA(k);c.sl=c.sl||{};c.sl[id]=!c.sl[id];save();render()}
+function shotPrompt(k,id){const B=parseBlocks(curA(k).content).blocks,i=B.findIndex(b=>b.id===id);
+ return prompt_(k)+"\n\n【只重写 Shot "+id+"】\n当前内容：\n"+B[i].raw+"\n前一镜：\n"+(B[i-1]?B[i-1].raw:"None")+"\n后一镜：\n"+(B[i+1]?B[i+1].raw:"None")+"\n\n要求：只输出这一个镜头的完整块（### Shot "+id+"），保持与前后镜头的关系，其他镜头不得改动。"}
+function prompt_(k){const r=ROLES[k],it=curA("intent");
+ let p=r.rule.replace("{MAXDUR}",S.maxDur)+"\n\n【信息优先级】原始意图 > 用户确认的决定 > 已锁定内容 > 当前内容 > AI建议。不得为了“更好”覆盖上层信息，只能提出“偏离提示”。\n\n【原始意图（硬锁）】\n"+(it?it.content:"（尚未确认原始意图）");
+ if(k==="map")p+="\n\n【原始想法（参考，不要改写）】\n"+(S.idea||"（无）");
+ const blk=(d,tag)=>{const u=curA(d);return"\n\n【"+tag+"："+ROLES[d].name+" V"+(u?u.version:"?")+"（"+(u?LK[u.lock]+(u.lock==="soft"?"，请尽量不要改变":u.lock==="hard"?"，禁止改变":""):"")+"）】\n"+(u?u.content:"（尚无内容，请先完成上游阶段）")};
+ DEPS[k].filter(d=>d!=="intent").forEach(d=>p+=blk(d,"上游"));CTX[k].forEach(d=>p+=blk(d,"参考"));
+ return p+"\n\n【输出结构】请严格使用以下英文小节标题，逐项输出：\n"+r.fields+"\n\n如果输出与原始意图出现明显偏离，请在末尾单独标注“偏离提示”。"}
+function driftPrompt(k){const c=curA(k),it=curA("intent");return"请对照【原始意图】检查下面的内容是否偏离，列出偏离点和建议，不要改写内容。\n\n【原始意图】\n"+(it?it.content:"")+"\n\n【"+ROLES[k].name+"】\n"+(c?c.content:"")}
+function copy(t,b){try{navigator.clipboard.writeText(t).then(()=>{b.textContent="已复制"})}catch(e){b.textContent="请长按文本手动复制"}}
+function render(){$("nav").innerHTML=TABS.map(([k,n])=>`<button class="${k===tab?"on":""}" onclick="tab='${k}';render()">${n}</button>`).join("");
+ $("main").innerHTML=tab==="core"?vCore():tab==="intent"?vIntent():tab==="set"?vSet():vStage(tab)}
+function badge(k){const a=curA(k);if(!a)return'<span class="tag">未开始</span>';
+ return(isStale(k)?'<span class="tag warn">⚠ 上游已变化</span>':"")+`<span class="tag ${a.status==="confirmed"?"lock":""}">${a.status==="confirmed"?"已确认":"草稿"}</span>`+(a.lock!=="none"?`<span class="tag lock">🔒${LK[a.lock]}</span>`:"")+(a.valid===false?'<span class="tag warn">未过Schema</span>':"")}
+function staleBox(k){return`<div class="note" style="margin-top:6px;color:var(--warn)">⚠ Upstream changed：${esc(reason(k))}。This artifact may no longer reflect the latest decision.<br>你可以：重新生成（用下方提示词）、手动修改，或确认仍然有效。不会自动删除或改写。</div><div class="row"><button onclick="ack('${k}')">确认仍然有效</button></div>`}
+function vCore(){return`<div class="card intent"><h3>Project Core</h3><div class="note">原始想法 → 原始意图 → 意图地图 → 故事 → 心理 → 导演<br>优先级：原始意图 ＞ 用户确认 ＞ 锁定内容 ＞ 当前内容 ＞ AI建议</div></div>`+
+ORDER.map((k,i)=>{const a=curA(k);return`<div class="card"><h3>${String(i+1).padStart(2,"0")} ${ROLES[k].name}${DEPS[k].length?" ← "+DEPS[k].map(d=>ROLES[d].name).join("、"):""}</h3>
+<div class="row" style="margin:0 0 6px">${a?'<span class="tag">V'+a.version+"</span>":""}${badge(k)}</div>
+${isStale(k)?`<div class="note">${esc(reason(k))}。下游：${ORDER.filter(x=>DEPS[x].includes(k)).map(x=>ROLES[x].name).join("、")||"无"}</div>`:""}
+<div class="row"><button onclick="tab='${k==="intent"?"intent":k}';render()">进入</button></div></div>`}).join("")+
+`<div class="card"><h3>项目数据</h3><div class="row"><button onclick="exp()">导出JSON</button><button onclick="if(confirm('清空全部数据？')){S=blank();save();render()}">清空</button></div></div>`}
+function vIntent(){const c=curA("intent"),hard=c&&c.lock==="hard";
+ return`<div class="card"><h3>① 原始想法（用户原话，可以很乱；AI不会改它）</h3>
+<textarea id="idea" placeholder="把最初的想法、情绪、片段原样写在这里" oninput="S.idea=this.value;save()">${esc(S.idea)}</textarea></div>
+<div class="card intent"><h3>② 原始意图 Original Intent · ${c?"当前 V"+c.version:"未确认"}</h3>
+<div class="row" style="margin:0 0 6px">${badge("intent")}</div>
+<p class="note">用你自己的话写清楚：你真正想表达什么。确认后进入硬锁，是全项目最高优先级。</p>
+<textarea id="d_intent" ${hard?"readonly":""} oninput="S.draft.intent=this.value;save()">${esc(S.draft.intent)}</textarea>
+<div class="row"><button ${hard?"disabled":""} onclick="S.draft.intent=S.idea;save();render()">从原始想法复制</button>
+<button class="pri" ${hard?"disabled":""} onclick="confirmIntent()">确认为原始意图（硬锁）</button>
+<button ${hard?"":"disabled"} onclick="if(confirm('解除硬锁后修改意图，会让所有下游标记为过期。确定？')){curA('intent').lock='none';save();render()}">解除硬锁以修改</button></div></div>
+<div class="card"><h3>意图版本</h3>${S.art.intent.map(v=>`<div class="ver"><span>V${v.version} <span class="note">${v.createdAt}</span></span><button onclick="S.draft.intent=S.art.intent[${v.version-1}].content;save();render()">载入</button></div>`).reverse().join("")||'<div class="note">还没有版本</div>'}</div>`}
+function confirmIntent(){const t=$("d_intent").value.trim();if(!t)return;
+ S.art.intent.push({id:"intent_v"+(S.art.intent.length+1),type:"intent",version:S.art.intent.length+1,status:"confirmed",createdAt:new Date().toLocaleString("zh-CN",{hour12:false}),basedOn:{},lock:"hard",valid:true,content:t});
+ S.cur.intent=S.art.intent.length-1;save();render()}
+function exp(){const w=document.createElement("textarea");w.value=JSON.stringify(S,null,2);$("main").appendChild(w);w.select();try{document.execCommand("copy")}catch(e){}w.remove();alert("已尝试复制到剪贴板")}
+function vStage(k){
+ const r=ROLES[k],c=curA(k),hard=c&&c.lock==="hard",vm=VMSG[k],ready=!!curA("intent");
+ return`<div class="card intent"><h3>原始意图（硬锁，只读）</h3><div class="note">${esc(curA("intent")?curA("intent").content:"尚未确认，请先到“想法/意图”")}</div></div>
+<div class="card"><h3>${r.name} · ${c?"当前 V"+c.version:"暂无版本"}</h3>
+<div class="row" style="margin:0">${badge(k)}</div>
+${c&&isStale(k)?staleBox(k):""}
+${k==="map"?'<p class="note">AI提取的意图地图只是建议。你修改并确认后，它才算“用户确认的决定”；锁定后进入“锁定内容”。</p>':""}
+<label>① 提示词（手动模式：复制去任意AI）</label><pre>${esc(prompt_(k))}</pre>
+<div class="row"><button onclick="copy(prompt_('${k}'),this)">复制提示词</button><button onclick="callAPI('${k}',this)" ${hard||!ready?"disabled":""}>用API生成</button></div>
+<label>② 粘贴/编辑结果（保存前做Schema校验，AI结果需你确认）</label>
+<textarea id="d_${k}" ${hard?"readonly":""} oninput="S.draft['${k}']=this.value;save()" placeholder="把AI的输出粘贴到这里，可直接修改">${esc(S.draft[k])}</textarea>
+${vm?`<div class="note" style="color:var(--warn)">缺少：${esc(vm.join("、"))}</div><div class="row"><button onclick="saveV('${k}',true)">仍然保存（标记未过校验）</button></div>`:""}
+<div class="row"><button class="pri" ${hard?"disabled":""} onclick="saveV('${k}')">校验并保存为新版本</button>
+<button ${c&&c.status!=="confirmed"?"":"disabled"} onclick="confirmA('${k}')">确认当前版本</button>
+<button ${c?"":"disabled"} onclick="copy(driftPrompt('${k}'),this)">复制偏离检查提示词</button></div>
+<label>锁定级别（软锁：提示AI尽量不改；硬锁：禁止修改和回退）</label>
+<div class="row" style="margin:0">${["none","soft","hard"].map(l=>`<button class="${c&&c.lock===l?"on":""}" ${c?"":"disabled"} onclick="setLock('${k}','${l}')">${LK[l]}</button>`).join("")}</div></div>
+${BLK[k]?cardsHTML(k):""}<div class="card"><h3>版本（Artifact）</h3>${S.art[k].length?S.art[k].map((v,i)=>`<div class="ver"><span>V${v.version} ${i===S.cur[k]?'<span class="tag lock">当前</span>':""} <span class="note">${v.createdAt}${DEPS[k].length?" · 基于"+DEPS[k].map(d=>ROLES[d].name+"V"+v.basedOn[d]).join("、"):""}</span></span>
+<span><button ${hard||i===S.cur[k]?"disabled":""} onclick="S.cur['${k}']=${i};save();render()">恢复</button>
+<button onclick="S.draft['${k}']=S.art['${k}'][${i}].content;save();render()">载入编辑</button></span></div>`).reverse().join(""):'<div class="note">还没有版本</div>'}</div>`}
+function saveV(k,force){const c=curA(k);if(c&&c.lock==="hard")return;let t=$("d_"+k).value.trim();if(!t)return;t=keepLocked(k,t,c);
+ const miss=validate(k,t);if(miss.length&&!force){VMSG[k]=miss;render();return}
+ if(c&&c.lock==="soft"&&!confirm("当前版本已软锁定，确定生成新版本？"))return;
+ delete VMSG[k];const n=S.art[k].length+1,b={};DEPS[k].forEach(d=>{const u=curA(d);if(u)b[d]=u.version});
+ S.art[k].push({id:k+"_v"+n,type:k,version:n,status:"draft",createdAt:new Date().toLocaleString("zh-CN",{hour12:false}),basedOn:b,lock:"none",valid:!miss.length,content:t,sl:c&&c.sl?{...c.sl}:{}});
+ S.cur[k]=S.art[k].length-1;save();render()}
+function confirmA(k){curA(k).status="confirmed";save();render()}
+function setLock(k,l){curA(k).lock=l;save();render()}
+function ack(k){const a=curA(k);DEPS[k].forEach(d=>{const u=curA(d);if(u)a.basedOn[d]=u.version});save();render()}
+function vSet(){return`<div class="card"><h3>API配置（模型与角色解耦）</h3><p class="note">OpenAI 兼容格式（/chat/completions）。聊天预览里的页面会拦截对外请求，API模式需把本页存成html在本地浏览器打开才可能生效；Key只存本机浏览器。手动模式不受影响。</p></div><div class="card"><h3>目标视频模型</h3><label>单镜头最长秒数（分镜超过会提示）</label><input type="number" value="${S.maxDur}" onchange="S.maxDur=+this.value||8;save()"></div>`+
+ORDER.filter(k=>k!=="intent").map(k=>{const c=S.cfg[k];return`<div class="card"><h3>${ROLES[k].name}</h3>
+<label>Provider（备注用）</label><input value="${esc(c.provider)}" onchange="S.cfg.${k}.provider=this.value;save()" placeholder="[TBD]">
+<label>Endpoint</label><input value="${esc(c.endpoint)}" onchange="S.cfg.${k}.endpoint=this.value;save()" placeholder="https://.../v1/chat/completions">
+<label>Model</label><input value="${esc(c.model)}" onchange="S.cfg.${k}.model=this.value;save()" placeholder="[TBD]">
+<label>API Key</label><input type="password" value="${esc(c.key)}" onchange="S.cfg.${k}.key=this.value;save()" placeholder="[TBD]"></div>`}).join("")}
+async function callAPI(k,b){const c=S.cfg[k]||{};
+ if(!c.endpoint||!c.model||!c.key){alert("请先在“设置”里配置这个角色，或用手动模式。");return}
+ b.disabled=true;b.textContent="生成中…";
+ try{const res=await fetch(c.endpoint,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+c.key},body:JSON.stringify({model:c.model,messages:[{role:"user",content:prompt_(k)}]})});
+  const j=await res.json(),t=j.choices&&j.choices[0]&&j.choices[0].message.content;if(!t)throw new Error(JSON.stringify(j).slice(0,200));
+  S.draft[k]=t;save();render()}
+ catch(e){alert("调用失败："+e.message+"\n（预览里外部请求会被拦截，请用手动模式或本地打开。）");b.disabled=false;b.textContent="用API生成"}}
+render();
+</script></body></html>

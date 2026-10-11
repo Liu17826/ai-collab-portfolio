@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#F1F1F1" />
+  <title>齐司礼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <!-- 背景 -->
+  <div class="bg-layer"></div>
+
+  <div class="app">
+    <!-- 顶部：角色卡感，头像 + 名字居中，功能按钮收在两角 -->
+    <header class="profile">
+      <button id="drawerBtn" class="icon-btn profile-corner profile-corner-left" aria-label="对话列表">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <line x1="4" y1="7" x2="20" y2="7"/>
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <line x1="4" y1="17" x2="20" y2="17"/>
+        </svg>
+      </button>
+
+      <div class="profile-main">
+        <div class="profile-avatar">
+          <img src="./assets/avatar.jpeg" alt="齐司礼" />
+        </div>
+        <div class="profile-name">
+          <h1 class="profile-name-cn">齐司礼</h1>
+          <div class="sariel-en"><span class="status-dot"></span>SARIEL</div>
+        </div>
+      </div>
+
+      <div class="profile-corner profile-corner-right">
+        <button id="memoryBtn" class="icon-btn" aria-label="记忆">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+
+        <button id="settingsBtn" class="icon-btn" aria-label="设置">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 抽屉 -->
+    <aside id="drawer" class="drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">对话</div>
+        <button id="newChatBtn" class="new-chat-btn">＋ 新对话</button>
+      </div>
+      <div id="chatList" class="chat-list"></div>
+    </aside>
+    <div id="drawerMask" class="drawer-mask"></div>
+
+    <!-- 消息区 -->
+    <main id="messages" class="messages">
+      <div id="emptyState" class="empty-state">
+        <div class="empty-name">齐司礼</div>
+        <div class="empty-hint">……<br/>很久没发消息了。<br/>笨鸟，今天过来是有什么事？</div>
+      </div>
+
+      <!-- 昙花水印 -->
+      <img class="flower-watermark" src="./assets/flower.jpeg" alt="" aria-hidden="true" />
+    </main>
+
+    <!-- 输入区 -->
+    <div id="attachmentChip" class="attachment-chip" hidden></div>
+    <footer class="composer">
+      <input id="fileInput" type="file" accept=".txt,.pdf,.docx,image/*" hidden />
+      <button id="attachBtn" type="button" class="attach-btn" aria-label="上传文件">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </button>
+      <textarea id="input" class="composer-input" rows="1" placeholder="说点什么……"></textarea>
+      <button id="stopBtn" class="stop-btn" hidden>停止</button>
+      <button id="sendBtn" class="send-btn" aria-label="发送">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </footer>
+
+    <!-- 设置面板 -->
+    <div id="settingsPanel" class="settings-panel" hidden>
+      <div class="settings-content">
+        <div class="settings-header">
+          <div class="settings-title">设置</div>
+          <button id="closeSettingsBtn" class="icon-btn">✕</button>
+        </div>
+        <div class="settings-body">
+          <div class="field">
+            <label class="field-label">DeepSeek API Key</label>
+            <input id="apiKey" type="password" class="field-input" placeholder="your-api-key-here" autocomplete="off" />
+            <div class="field-hint">本地保存，不上传。<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> 获取</div>
+          </div>
+          <div class="field">
+            <label class="field-label">你的昵称（笨鸟名字）</label>
+            <input id="userName" type="text" class="field-input" placeholder="留空则用「笨鸟」" maxlength="12" />
+          </div>
+          <div class="field">
+            <label class="field-label">模型</label>
+            <select id="modelSelect" class="field-input">
+              <option value="deepseek-chat">deepseek-chat（V3 · 推荐）</option>
+              <option value="deepseek-reasoner">deepseek-reasoner（R1 · 推理更强）</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">温度（创造性）</label>
+            <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.7" class="field-range" />
+            <div class="field-hint" id="tempVal">0.7 · 稳定平衡</div>
+          </div>
+          <div class="field">
+            <label class="field-label">打字速度（真人感）</label>
+            <input id="typeSpeed" type="range" min="10" max="120" step="5" value="45" class="field-range" />
+            <div class="field-hint" id="typeSpeedVal">45ms · 真人格（推荐）</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" id="autoMemory" style="width:auto;" /> 自动提取长期记忆
+            </label>
+            <div class="field-hint">开启后，每次对话后会自动判断是否保存（会增加少量 token 消耗）</div>
+          </div>
+          <div class="settings-actions">
+            <button id="clearAllBtn" class="btn-danger">🗑 重置全部数据（含 API Key）</button>
+          </div>
+          <div class="settings-footer">齐司礼 AI · 数据全存本地</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 记忆面板 -->
+    <div id="memoryPanel" class="settings-panel" hidden>
+      <div class="settings-content memory-content">
+        <div class="settings-header">
+          <div class="settings-title">关于她的记忆</div>
+          <button id="closeMemoryBtn" class="icon-btn">✕</button>
+        </div>
+        <div class="settings-body">
+          <div class="memory-section">
+            <div class="memory-section-title">【关于她这个人】</div>
+            <div class="memory-hint">齐司礼会记住这些，让他更像真的认识你</div>
+
+            <label class="memory-label">她喜欢被这样称呼</label>
+            <input class="memory-input" data-path="longTerm.nickname" placeholder="例如：小林、小雨" />
+
+            <label class="memory-label">她的性格</label>
+            <textarea class="memory-input" data-path="longTerm.personality" placeholder="例如：喜欢摄影、喜欢音乐" rows="2"></textarea>
+
+            <label class="memory-label">她的习惯</label>
+            <textarea class="memory-input" data-path="longTerm.habits" placeholder="例如：晚上喝咖啡会失眠、喜欢雨天、睡前听歌" rows="2"></textarea>
+
+            <label class="memory-label">她的偏好</label>
+            <textarea class="memory-input" data-path="longTerm.preferences" placeholder="例如：讨厌香菜、喜欢抹茶、偏爱冷色调" rows="2"></textarea>
+
+            <label class="memory-label">工作/学习</label>
+            <textarea class="memory-input" data-path="longTerm.work" placeholder="例如：正在做一个 AI 项目、最近在准备面试" rows="2"></textarea>
+
+            <label class="memory-label">重要的事</label>
+            <textarea class="memory-input" data-path="longTerm.important" placeholder="例如：家里有只猫叫年糕、和朋友最近有矛盾" rows="2"></textarea>
+          </div>
+
+          <div class="memory-section">
+            <div class="memory-section-title">【她最近的状态】</div>
+            <div class="memory-hint">告诉他你最近怎么样，他会更懂你</div>
+
+            <label class="memory-label">最近心情</label>
+            <input class="memory-input" data-path="currentState.mood" placeholder="例如：有点累但还好、最近有点低落" />
+
+            <label class="memory-label">在忙的事</label>
+            <textarea class="memory-input" data-path="currentState.focus" placeholder="例如：在改项目、准备考试" rows="2"></textarea>
+
+            <label class="memory-label">担心的事</label>
+            <textarea class="memory-input" data-path="currentState.concerns" placeholder="例如：最近在学习新技能" rows="2"></textarea>
+          </div>
+
+          <div class="memory-section">
+            <div class="memory-section-title">【关于"我们"】</div>
+            <div class="memory-hint">让他记得你们之间的事</div>
+
+            <label class="memory-label">共同回忆</label>
+            <textarea class="memory-input" data-path="relationship.sharedMemories" placeholder="例如：一起完成过一次项目" rows="2"></textarea>
+
+            <label class="memory-label">彼此懂的梗</label>
+            <textarea class="memory-input" data-path="relationship.insideJokes" placeholder="例如：你第一次生气是因为他不回消息" rows="2"></textarea>
+
+            <label class="memory-label">她喜欢的方式</label>
+            <textarea class="memory-input" data-path="relationship.herLanguage" placeholder="例如：喜欢被吐槽式关心、不喜欢直接情话" rows="2"></textarea>
+          </div>
+
+          <div class="settings-actions">
+            <button id="clearMemoryBtn" class="btn-danger">清空所有记忆</button>
+          </div>
+
+          <div class="settings-footer">
+            记忆是 AI 理解你的依据
+            <br/>填得越多，他越懂你
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt 模块（按顺序加载，最后是装配器） -->
+  <!-- 按优先级顺序加载：00 核心 > 01 现实环境 > 07 防幻觉 > 05 记忆 > 02 人格 > 03 世界背景 > 04 关系 > 06 对话风格 -->
+  <script src="./prompts/00_core_rules.js"></script>
+  <script src="./prompts/01_reality.js"></script>
+  <script src="./prompts/07_hallucination_rules.js"></script>
+  <script src="./prompts/05_memory.js"></script>
+  <script src="./prompts/02_character.js"></script>
+  <script src="./prompts/03_world_background.js"></script>
+  <script src="./prompts/04_relationship.js"></script>
+  <script src="./prompts/06_dialogue_style.js"></script>
+  <script src="./prompt.js"></script>
+  <script src="./memory.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
