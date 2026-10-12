@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>中译英翻译训练营</title>
+<style>
+  :root{
+    --paper:#F7F2E7;
+    --paper-line:#E8DEC8;
+    --ink:#2B2A28;
+    --ink-soft:#6b6558;
+    --card:#FFFDF8;
+    --purple:#8B5CF6;
+    --pink:#EC6BA5;
+    --blue:#3E8CFF;
+    --green:#2FAE83;
+    --red:#F0603D;
+    --teal:#1FA6A0;
+    --violet:#6D4CFF;
+    --orange:#F59E0B;
+    --gray:#9A948A;
+    --shadow: 0 2px 10px rgba(43,42,40,0.08);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; -webkit-font-smoothing:antialiased;}
+  body{ padding-bottom: 40px; }
+  h1,h2,h3{ font-family: "Songti SC", "Noto Serif SC", Georgia, serif; margin:0; font-weight:700; }
+  .mono{ font-family: "SF Mono", Menlo, monospace; }
+  #app{ max-width: 640px; margin: 0 auto; min-height:100vh; position:relative; }
+
+  /* ---------- top bar ---------- */
+  .topbar{ position:sticky; top:0; z-index:20; background:var(--paper); padding:14px 16px 10px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--paper-line); }
+  .topbar .brand{ display:flex; align-items:center; gap:8px; }
+  .topbar .brand h1{ font-size:19px; letter-spacing:0.5px; }
+  .topbar .dot{ width:8px; height:8px; border-radius:50%; background:var(--violet); }
+  .iconbtn{ border:none; background:var(--card); box-shadow:var(--shadow); border-radius:12px; padding:8px 12px; font-size:13px; color:var(--ink); display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .iconbtn:active{ transform: scale(0.97); }
+  .badge{ background:var(--red); color:#fff; border-radius:10px; font-size:11px; padding:1px 6px; min-width:16px; text-align:center; }
+  .topbar-actions{ display:flex; gap:8px; align-items:center; }
+  .key-dot{ width:6px; height:6px; border-radius:50%; background:var(--gray); }
+  .key-dot.on{ background:var(--green); }
+
+  /* ---------- home ---------- */
+  .section-label{ font-size:12px; color:var(--ink-soft); letter-spacing:1px; margin:22px 16px 10px; text-transform:uppercase; }
+  .hero{ margin:16px; padding:18px; border-radius:18px; background:linear-gradient(135deg, #EFE6FF, #F7F2E7); }
+  .hero h2{ font-size:18px; }
+  .hero .note{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; line-height:1.6; }
+
+  .stats-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:8px; margin:14px 16px 0; }
+  .stat-chip{ background:var(--card); border-radius:12px; padding:10px 8px; box-shadow:var(--shadow); text-align:center; }
+  .stat-chip .lbl{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; }
+  .stat-chip .val{ font-size:18px; font-weight:700; margin-top:2px; }
+
+  .cardgrid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; padding:0 16px; }
+  .topic-card{ background:var(--card); border-radius:16px; padding:18px; box-shadow:var(--shadow); cursor:pointer; border:1px solid rgba(0,0,0,0.03); min-height:120px; display:flex; flex-direction:column; justify-content:space-between; }
+  .topic-card:active{ transform: scale(0.98); }
+  .topic-card .icon{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:700; margin-bottom:8px; }
+  .topic-card .ttl{ font-size:15px; font-weight:700; }
+  .topic-card .sub{ font-size:11.5px; color:var(--ink-soft); margin-top:4px; }
+
+  /* ---------- sentence list ---------- */
+  .backrow{ display:flex; align-items:center; gap:10px; padding:10px 16px 0; }
+  .backbtn{ border:none; background:none; font-size:15px; color:var(--ink-soft); padding:4px 0; cursor:pointer; }
+  .screen-title{ display:flex; align-items:center; gap:10px; padding:6px 16px 4px; }
+  .screen-title h2{ font-size:19px; }
+  .screen-title .count{ font-size:12px; color:var(--ink-soft); margin-left:auto; }
+
+  .toolbar{ display:flex; gap:6px; padding:10px 16px; overflow-x:auto; }
+  .tbtn{ flex:none; border:none; background:var(--card); padding:7px 12px; border-radius:999px; font-size:12.5px; color:var(--ink-soft); box-shadow:var(--shadow); cursor:pointer; white-space:nowrap; }
+  .tbtn.active{ background:var(--ink); color:#fff; }
+
+  .sent-list-item{ background:var(--card); border-radius:14px; padding:14px; box-shadow:var(--shadow); margin:0 16px 10px; cursor:pointer; }
+  .sent-list-item:active{ transform: scale(0.99); }
+  .sent-list-item .top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .sent-list-item .num{ font-size:11px; font-weight:700; color:var(--violet); padding:2px 8px; border-radius:999px; background:rgba(109,76,255,0.10); }
+  .sent-list-item .status{ font-size:11px; }
+  .sent-list-item.done .status{ color:var(--green); }
+  .sent-list-item.partial .status{ color:var(--orange); }
+  .sent-list-item .cn{ font-size:14px; line-height:1.6; color:var(--ink); }
+
+  /* ---------- practice screen ---------- */
+  .prompt-card{ background:var(--card); border-radius:14px; padding:18px 16px; box-shadow:var(--shadow); margin:0 16px 14px; border-left:4px solid var(--violet); }
+  .prompt-card .label{ font-size:11px; color:var(--violet); font-weight:700; letter-spacing:0.5px; margin-bottom:6px; }
+  .prompt-card .cn{ font-size:17px; font-weight:600; line-height:1.6; }
+  .prompt-card .hint{ font-size:12px; color:var(--ink-soft); margin-top:10px; padding-top:10px; border-top:1px dashed var(--paper-line); }
+
+  .steps{ background:#FBF7EA; border-radius:12px; padding:12px 14px; margin:0 16px 14px; font-size:12.5px; line-height:1.7; color:var(--ink-soft); }
+  .steps b{ color:var(--violet); }
+
+  textarea{ width:100%; border:1.5px solid var(--paper-line); border-radius:12px; padding:12px; font-size:15px; font-family:inherit; resize:vertical; min-height:120px; background:var(--card); color:var(--ink); line-height:1.7; }
+  textarea:focus{ outline:2px solid var(--violet); border-color:transparent; }
+
+  .status-bar{ margin:0 16px 12px; padding:10px 14px; background:var(--card); border-radius:12px; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px; }
+  .status-bar .wc{ font-size:13px; color:var(--ink-soft); }
+  .status-bar .wc b{ color:var(--ink); font-size:15px; }
+
+  .row-btns{ display:flex; gap:10px; margin:0 16px 14px; flex-wrap:wrap; }
+  .btn{ border:none; padding:11px 16px; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-ghost{ background:var(--card); color:var(--ink); box-shadow:var(--shadow); }
+  .btn-violet{ background:var(--violet); color:#fff; }
+  .btn:disabled{ opacity:0.4; }
+
+  .feedback-box{ margin:0 16px 14px; padding:14px; border-radius:12px; }
+  .feedback-box.good{ background:rgba(47,174,131,0.12); border:1px solid rgba(47,174,131,0.35); }
+  .feedback-box.warn{ background:rgba(240,96,61,0.10); border:1px solid rgba(240,96,61,0.3); }
+  .feedback-box.info{ background:rgba(62,140,255,0.10); border:1px solid rgba(62,140,255,0.3); }
+  .feedback-title{ font-weight:700; font-size:14px; margin-bottom:8px; }
+  .feedback-line{ font-size:13.5px; line-height:1.75; margin:6px 0; }
+  .section-divider{ font-size:12px; color:var(--ink-soft); margin:12px 0 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .chip-pill{ display:inline-flex; align-items:center; gap:4px; padding:4px 9px; border-radius:999px; font-size:11.5px; margin:3px 4px 3px 0; color:#fff; }
+  .spinner{ width:14px; height:14px; border:2px solid rgba(0,0,0,0.15); border-top-color:var(--ink); border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; vertical-align:middle; margin-right:6px; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .grade-row{ display:flex; gap:10px; margin:10px 0; padding:10px; background:#fff; border-radius:8px; }
+  .grade-row .dim{ flex:none; width:80px; font-size:12px; color:var(--ink-soft); }
+  .grade-row .bar{ flex:1; height:8px; background:var(--paper-line); border-radius:4px; overflow:hidden; }
+  .grade-row .bar > div{ height:100%; background:linear-gradient(90deg, var(--violet), var(--pink)); }
+  .grade-row .v{ flex:none; width:36px; text-align:right; font-weight:700; font-size:13px; }
+
+  .correction-row{ margin:10px 0; padding:10px; background:#fff; border-radius:8px; border-left:3px solid var(--red); }
+  .correction-row .original{ font-size:13.5px; color:var(--red); text-decoration:line-through; }
+  .correction-row .fixed{ font-size:13.5px; color:var(--green); font-weight:600; margin-top:4px; }
+  .correction-row .expl{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
+  .correction-row .tag{ display:inline-block; background:var(--violet); color:#fff; padding:1px 6px; border-radius:8px; font-size:10px; margin-left:4px; }
+
+  .vocab-chip{ display:inline-block; padding:3px 8px; background:var(--card); border:1px solid var(--paper-line); border-radius:8px; font-size:12px; margin:3px 4px 3px 0; }
+  .vocab-chip b{ color:var(--violet); }
+
+  /* ---------- modal ---------- */
+  .modal-mask{ position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:50; display:flex; align-items:flex-end; justify-content:center; animation:fadeIn 0.2s; }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .modal{ background:var(--paper); width:100%; max-width:640px; border-radius:20px 20px 0 0; padding:20px 18px 28px; max-height:90vh; overflow-y:auto; position:relative; }
+  .modal h3{ font-size:18px; margin-bottom:6px; }
+  .modal .sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; line-height:1.6; }
+  .modal label{ display:block; font-size:13px; font-weight:600; margin:14px 0 6px; }
+  .modal .status{ margin-top:10px; padding:10px 12px; border-radius:10px; font-size:13px; line-height:1.6; }
+  .modal .status.ok{ background:rgba(47,174,131,0.12); border:1px solid rgba(47,174,131,0.35); }
+  .modal .status.err{ background:rgba(240,96,61,0.10); border:1px solid rgba(240,96,61,0.3); }
+  .modal .status.idle{ background:#F1ECDD; border:1px dashed var(--paper-line); color:var(--ink-soft); }
+  .modal .close-x{ position:absolute; right:16px; top:14px; font-size:22px; background:none; border:none; color:var(--ink-soft); cursor:pointer; }
+  .modal .provider-pick{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+  .modal .pchip{ padding:6px 12px; border-radius:999px; border:1.5px solid var(--paper-line); background:var(--card); font-size:13px; cursor:pointer; }
+  .modal .pchip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  input[type=password]{ width:100%; border:1.5px solid var(--paper-line); border-radius:12px; padding:12px; font-size:14px; background:var(--card); color:var(--ink); }
+  input[type=password]:focus{ outline:2px solid var(--violet); border-color:transparent; }
+  input[type=text]{ width:100%; border:1.5px solid var(--paper-line); border-radius:12px; padding:12px; font-size:16px; font-family:inherit; background:var(--card); color:var(--ink); }
+  input[type=text]:focus{ outline:2px solid var(--violet); border-color:transparent; }
+  .close-x{ position:absolute; top:10px; right:14px; width:32px; height:32px; border:none; background:transparent; font-size:24px; line-height:1; color:var(--ink-soft); cursor:pointer; border-radius:50%; }
+  .close-x:active{ background:var(--paper-line); }
+
+  .empty{ text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:14px; }
+  .small-link{ font-size:12.5px; color:var(--ink-soft); background:none; border:none; text-decoration:underline; cursor:pointer; }
+
+  .pill-row{ display:flex; gap:6px; flex-wrap:wrap; }
+  .pill{ padding:3px 8px; border-radius:999px; font-size:11px; background:var(--card); color:var(--ink-soft); box-shadow:var(--shadow); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================= 100 句翻译 ============================= */
+const COLORS = { purple:'#8B5CF6', pink:'#EC6BA5', blue:'#3E8CFF', green:'#2FAE83', red:'#F0603D', teal:'#1FA6A0', violet:'#6D4CFF', orange:'#F59E0B', gray:'#9A948A' };
+
+const SENTENCES = [
+  { id:1,  cn:'', topic:'健康', difficulty:'简单'},
+  { id:2,  cn:'', topic:'教育', difficulty:'简单'},
+  { id:3,  cn:'', topic:'家庭/教育', difficulty:'简单'},
+  { id:4,  cn:'', topic:'经济', difficulty:'简单'},
+  { id:5,  cn:'', topic:'经济', difficulty:'简单'},
+  { id:6,  cn:'', topic:'工作', difficulty:'简单'},
+  { id:7,  cn:'', topic:'教育', difficulty:'简单'},
+  { id:8,  cn:'', topic:'文化/城市', difficulty:'中等'},
+  { id:9,  cn:'', topic:'社会', difficulty:'简单'},
+  { id:10, cn:'', topic:'环境', difficulty:'简单'},
+  { id:11, cn:'', topic:'社会/经济', difficulty:'中等'},
+  { id:12, cn:'', topic:'环境/科技', difficulty:'中等'},
+  { id:13, cn:'', topic:'社会', difficulty:'简单'},
+  { id:14, cn:'', topic:'文化', difficulty:'中等'},
+  { id:15, cn:'', topic:'社会', difficulty:'中等'},
+  { id:16, cn:'', topic:'教育/工作', difficulty:'简单'},
+  { id:17, cn:'', topic:'环境', difficulty:'中等'},
+  { id:18, cn:'', topic:'城市', difficulty:'中等'},
+  { id:19, cn:'', topic:'社会', difficulty:'中等'},
+  { id:20, cn:'', topic:'社会', difficulty:'简单'},
+  { id:21, cn:'', topic:'社会', difficulty:'中等'},
+  { id:22, cn:'', topic:'媒体', difficulty:'中等'},
+  { id:23, cn:'', topic:'科技', difficulty:'中等'},
+  { id:24, cn:'', topic:'工作', difficulty:'中等'},
+  { id:25, cn:'', topic:'健康', difficulty:'中等'},
+  { id:26, cn:'', topic:'教育', difficulty:'中等'},
+  { id:27, cn:'', topic:'社会', difficulty:'中等'},
+  { id:28, cn:'', topic:'法律', difficulty:'简单'},
+  { id:29, cn:'', topic:'环境/社会', difficulty:'中等'},
+  { id:30, cn:'', topic:'社会', difficulty:'中等'},
+  { id:31, cn:'', topic:'科技', difficulty:'中等'},
+  { id:32, cn:'', topic:'教育', difficulty:'中等'},
+  { id:33, cn:'', topic:'社会', difficulty:'中等'},
+  { id:34, cn:'', topic:'城市', difficulty:'中等'},
+  { id:35, cn:'', topic:'科技', difficulty:'中等'},
+  { id:36, cn:'', topic:'文化', difficulty:'简单'},
+  { id:37, cn:'', topic:'教育', difficulty:'中等'},
+  { id:38, cn:'', topic:'工作', difficulty:'中等'},
+  { id:39, cn:'', topic:'健康/教育', difficulty:'中等'},
+  { id:40, cn:'', topic:'科技', difficulty:'简单'},
+  { id:41, cn:'', topic:'环境', difficulty:'中等'},
+  { id:42, cn:'', topic:'媒体/家庭', difficulty:'简单'},
+  { id:43, cn:'', topic:'家庭', difficulty:'中等'},
+  { id:44, cn:'', topic:'社会', difficulty:'中等'},
+  { id:45, cn:'', topic:'社会', difficulty:'中等'},
+  { id:46, cn:'', topic:'教育/工作', difficulty:'中等'},
+  { id:47, cn:'', topic:'科技', difficulty:'简单'},
+  { id:48, cn:'', topic:'社会', difficulty:'中等'},
+  { id:49, cn:'', topic:'工作', difficulty:'中等'},
+  { id:50, cn:'', topic:'文化', difficulty:'中等'},
+  { id:51, cn:'', topic:'经济', difficulty:'中等'},
+  { id:52, cn:'', topic:'经济', difficulty:'简单'},
+  { id:53, cn:'', topic:'环境', difficulty:'中等'},
+  { id:54, cn:'', topic:'科技', difficulty:'中等'},
+  { id:55, cn:'', topic:'工作', difficulty:'中等'},
+  { id:56, cn:'', topic:'教育', difficulty:'中等'},
+  { id:57, cn:'', topic:'教育', difficulty:'简单'},
+  { id:58, cn:'', topic:'经济', difficulty:'中等'},
+  { id:59, cn:'', topic:'环境', difficulty:'中等'},
+  { id:60, cn:'', topic:'家庭/教育', difficulty:'简单'},
+  { id:61, cn:'', topic:'环境/社会', difficulty:'中等'},
+  { id:62, cn:'', topic:'法律', difficulty:'中等'},
+  { id:63, cn:'', topic:'环境', difficulty:'中等'},
+  { id:64, cn:'', topic:'教育/经济', difficulty:'中等'},
+  { id:65, cn:'', topic:'社会', difficulty:'简单'},
+  { id:66, cn:'', topic:'教育', difficulty:'中等'},
+  { id:67, cn:'', topic:'社会', difficulty:'中等'},
+  { id:68, cn:'', topic:'科技', difficulty:'中等'},
+  { id:69, cn:'', topic:'科技/生活', difficulty:'中等'},
+  { id:70, cn:'', topic:'社会', difficulty:'中等'},
+  { id:71, cn:'', topic:'健康/科技', difficulty:'中等'},
+  { id:72, cn:'', topic:'社会', difficulty:'中等'},
+  { id:73, cn:'', topic:'科技/环境', difficulty:'困难'},
+  { id:74, cn:'', topic:'文化', difficulty:'简单'},
+  { id:75, cn:'', topic:'文化', difficulty:'中等'},
+  { id:76, cn:'', topic:'社会/家庭', difficulty:'中等'},
+  { id:77, cn:'', topic:'教育', difficulty:'中等'},
+  { id:78, cn:'', topic:'社会', difficulty:'简单'},
+  { id:79, cn:'', topic:'媒体', difficulty:'简单'},
+  { id:80, cn:'', topic:'环境', difficulty:'中等'},
+  { id:81, cn:'', topic:'城市', difficulty:'简单'},
+  { id:82, cn:'', topic:'教育', difficulty:'中等'},
+  { id:83, cn:'', topic:'教育', difficulty:'中等'},
+  { id:84, cn:'', topic:'教育/社会', difficulty:'中等'},
+  { id:85, cn:'', topic:'经济', difficulty:'中等'},
+  { id:86, cn:'', topic:'生活', difficulty:'困难'},
+  { id:87, cn:'', topic:'教育/工作', difficulty:'困难'},
+  { id:88, cn:'', topic:'教育', difficulty:'中等'},
+  { id:89, cn:'', topic:'经济', difficulty:'困难'},
+  { id:90, cn:'', topic:'工作/科技', difficulty:'中等'},
+  { id:91, cn:'', topic:'环境', difficulty:'中等'},
+  { id:92, cn:'', topic:'法律', difficulty:'困难'},
+  { id:93, cn:'', topic:'健康/媒体', difficulty:'中等'},
+  { id:94, cn:'', topic:'环境', difficulty:'困难'},
+  { id:95, cn:'', topic:'媒体', difficulty:'困难'},
+  { id:96, cn:'', topic:'环境/健康', difficulty:'困难'},
+  { id:97, cn:'', topic:'媒体', difficulty:'中等'},
+  { id:98, cn:'', topic:'环境/城市', difficulty:'中等'},
+  { id:99, cn:'', topic:'工作', difficulty:'中等'},
+  { id:100, cn:'', topic:'教育', difficulty:'困难'}
+];
+
+/* ============================= AI CONFIG ============================= */
+const PROVIDERS = {
+  deepseek: {
+    label: 'DeepSeek',
+    url: 'https://api.deepseek.com/v1/chat/completions',
+    model: 'deepseek-chat',
+    placeholder: 'your-api-key-here',
+    help: '在 platform.deepseek.com 申请 API Key，便宜量大，国内直连友好。'
+  },
+  zhipu: {
+    label: '智谱 GLM',
+    url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    model: 'glm-4-flash',
+    placeholder: 'xxxxxxxx.xxxxxxxx.xxxxxxxx',
+    help: '在 bigmodel.cn 申请，glm-4-flash 有免费额度。'
+  },
+  qwen: {
+    label: '通义千问 DashScope',
+    url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    model: 'qwen-turbo',
+    placeholder: 'your-api-key-here',
+    help: '在 dashscope.aliyuncs.com 申请，兼容 OpenAI 格式。'
+  }
+};
+let AI_CFG = { provider:'deepseek', key:'' };
+function loadAICfg(){ AI_CFG = storageGet('ai-cfg', { provider:'deepseek', key:'' }); }
+function saveAICfg(){ storageSet('ai-cfg', AI_CFG); }
+function aiReady(){ return !!(AI_CFG.key && AI_CFG.key.trim()); }
+
+/* ============================= NETWORK HELPERS ============================= */
+function fetchWithTimeout(url, options, timeoutMs=25000){
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), timeoutMs);
+  return fetch(url, Object.assign({}, options, { signal: controller.signal }))
+    .finally(()=>clearTimeout(timer));
+}
+
+async function callAI(promptText){
+  if(!aiReady()) throw new Error('NO_KEY');
+  const p = PROVIDERS[AI_CFG.provider];
+  let resp;
+  try{
+    resp = await fetchWithTimeout(p.url, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+AI_CFG.key.trim() },
+      body: JSON.stringify({
+        model: p.model,
+        max_tokens: 1800,
+        temperature: 0.3,
+        messages: [
+          { role:'system', content:'你只输出严格的 JSON 对象，不输出任何其他文字、说明或 markdown 代码块符号。' },
+          { role:'user', content: promptText }
+        ]
+      })
+    });
+  }catch(err){
+    if(err.name === 'AbortError') throw new Error('请求超时，请检查网络后重试');
+    throw err;
+  }
+  if(!resp.ok){
+    const txt = await resp.text().catch(()=> '');
+    throw new Error('HTTP '+resp.status+' · '+txt.slice(0,200));
+  }
+  const data = await resp.json();
+  const text = (data.choices?.[0]?.message?.content || '').trim();
+  if(!text) throw new Error('EMPTY_RESPONSE');
+  return parseJsonSafe(text);
+}
+
+function parseJsonSafe(text){
+  let raw = text.replace(/^```json\s*/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  // 尝试直接解析
+  try{ return JSON.parse(raw); }catch(e){}
+  // 提取第一个 { 到最后一个 } 的内容
+  const firstBrace = raw.indexOf('{');
+  const lastBrace = raw.lastIndexOf('}');
+  if(firstBrace>=0 && lastBrace>firstBrace){
+    const slice = raw.slice(firstBrace, lastBrace+1);
+    try{ return JSON.parse(slice); }catch(e){}
+  }
+  throw new Error('JSON_PARSE_FAIL: '+raw.slice(0,150));
+}
+
+async function callAIText(promptText){
+  if(!aiReady()) throw new Error('NO_KEY');
+  const p = PROVIDERS[AI_CFG.provider];
+  let resp;
+  try{
+    resp = await fetchWithTimeout(p.url, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+AI_CFG.key.trim() },
+      body: JSON.stringify({
+        model: p.model,
+        max_tokens: 500,
+        temperature: 0.3,
+        messages: [{ role:'user', content: promptText }]
+      })
+    });
+  }catch(err){
+    if(err.name === 'AbortError') throw new Error('请求超时，请检查网络后重试');
+    throw err;
+  }
+  if(!resp.ok){
+    const txt = await resp.text().catch(()=> '');
+    throw new Error('HTTP '+resp.status+' · '+txt.slice(0,200));
+  }
+  const data = await resp.json();
+  const text = (data.choices?.[0]?.message?.content || '').trim();
+  if(!text) throw new Error('EMPTY_RESPONSE');
+  return text;
+}
+
+const GRADE_PROMPT = (cn, userTranslation, refTranslation) => `你是一位严谨但温和的雅思考官，专门帮中国雅思考生按“结构化翻译法”逐词拆解中译英。
+
+【学生目标】目前 7 分，冲刺 7.5 分。
+
+【原句中文】${cn}
+【学生译文】${userTranslation}
+【参考译文 7.5】${refTranslation}
+
+【批改思路】按结构化拆解的方式，逐个判断“对了 / 错了”，不嘴下留情也不压分。保留学生原句风格，只改 1-3 个关键点就能拿到 7.5。
+
+请只输出一个 JSON 对象，不要任何其他文字或 markdown：
+{
+  "overall": 数字（按真实水平评分，0.5 步进，区间 4.5-7.5）,
+  "overall_zh": "中文一句话总评（先肯定）",
+  "dims": {
+    "accuracy": 数字（准确度 0-9）,
+    "grammar": 数字（语法 0-9）,
+    "vocab": 数字（词汇地道性 0-9）,
+    "style": 数字（句式多样性 0-9）
+  },
+  "is_correct": true/false（语法没有严重错误就算 correct）,
+  "word_by_word": [
+    { "phrase": "学生译文中的某个词/短语", "status": "good/bad/ok", "comment": "中文点评（✔ 不错 / ❌ 为什么错 / ⚠ 哪里可以更好）" }
+  ],
+  "key_fix": {
+    "original": "学生译文中最需要改的片段",
+    "fixed_75": "7.5 水平的改法（保留原句风格，只调 1-3 个点）",
+    "explanation": "中文解释为什么这么改",
+    "type": "错误类型：语法/搭配/用词/句式"
+  },
+  "ref_75": "7.5 分译文（保留学生原句风格，小改升级）",
+  "ref_9": "9 分范文（参考范文，复杂结构，仅供了解）",
+  "error_pattern": {
+    "category": "本次错误属于哪一类（介词搭配/动词时态/冠词/名词单复数/词伙/句式结构/拼写）",
+    "description": "这个类别常见的 3-5 个例子（列出常见搭配，如 impact on / rise in / access to / threat to）",
+    "how_to_remember": "怎么记这类错误（举例说明，比如'名词 + 介词'要作为整体记）"
+  },
+  "comment": "综合中文点评（按真实水平评价）"
+}`;
+
+/* ============================= STORAGE ============================= */
+function storageGet(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e){ return fallback; }
+}
+function storageSet(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+}
+
+let PROGRESS = {}; // { sentenceId: { done: bool, score: number, ts: number} }
+let LAST_VISIT = { sentenceId: 1 };
+
+/* ============================= APP STATE ============================= */
+const app = document.getElementById('app');
+let VIEW = 'home';
+let FILTER = 'all'; // all | undone | done | by-topic
+let TOPIC_FILTER = '';
+let CURRENT_SENTENCE = null;
+let CURRENT_TRANSLATION = '';
+let GRADING = false;
+let LAST_RESULT = null;
+let PENDING_REQUESTS = {}; // sentenceId -> { token, ts } for in-flight grading requests
+let REQUEST_SEQ = 0;
+
+/* ============================= BOOT ============================= */
+function cancelGrading(id){
+  delete PENDING_REQUESTS[id];
+  if(CURRENT_SENTENCE && CURRENT_SENTENCE.id === id){
+    GRADING = false;
+    render();
+  }
+}
+
+function resetSentence(id){
+  if(!confirm('重置第 '+id+' 句？会清除这句已保存的批改结果和"批改中"状态（你写的翻译草稿会保留）。')) return;
+  delete PENDING_REQUESTS[id];
+  delete PROGRESS[id];
+  storageSet('translation-progress', PROGRESS);
+  if(CURRENT_SENTENCE && CURRENT_SENTENCE.id === id){
+    GRADING = false;
+    LAST_RESULT = null;
+  }
+  render();
+}
+
+function boot(){
+  PROGRESS = storageGet('translation-progress', {});
+  LAST_VISIT = storageGet('translation-last', { sentenceId: 1 });
+  loadAICfg();
+  render();
+}
+
+function getStats(){
+  const total = SENTENCES.length;
+  const done = Object.values(PROGRESS).filter(p=>p.done).length;
+  const avgScore = done > 0
+    ? (Object.values(PROGRESS).filter(p=>p.done).reduce((s,p)=>s+(p.score||0),0)/done).toFixed(1)
+    : '—';
+  return { total, done, remaining: total-done, avgScore };
+}
+
+/* ============================= TOP BAR ============================= */
+function topBarHtml(){
+  const hasKey = aiReady();
+  return `<div class="topbar">
+    <div class="brand"><span class="dot"></span><h1>100 句翻译训练营</h1></div>
+    <div class="topbar-actions">
+      <button class="iconbtn" onclick="openWordbook()">📚 词库</button>
+      <button class="iconbtn" onclick="openDictLookup()">🔍 查词</button>
+      <button class="iconbtn" onclick="openErrorSummary()">📊 错题</button>
+      <button class="iconbtn" onclick="openAISettings()"><span class="key-dot ${hasKey?'on':''}"></span>AI</button>
+    </div>
+  </div>`;
+}
+
+/* ============================= HOME ============================= */
+function renderHome(){
+  const stats = getStats();
+  let html = topBarHtml();
+  html += `<div class="hero">
+    <h2>中译英翻译训练</h2>
+    <div class="note">雅思写作经典训练材料，<b>中译英</b>练习是结构化翻译法的核心。<br>用法：1) 想词伙 → 2) 想句式 → 3) 翻译 → 4) 对照参考 → 5) AI 批改找出语法错误<br>本 App 帮你自动完成第 5 步，DeepSeek AI 给你逐句批改。</div>
+  </div>`;
+
+  // stats
+  html += `<div class="stats-row">
+    <div class="stat-chip"><div class="lbl">总句数</div><div class="val">${stats.total}</div></div>
+    <div class="stat-chip"><div class="lbl">已完成</div><div class="val" style="color:var(--green)">${stats.done}</div></div>
+    <div class="stat-chip"><div class="lbl">剩余</div><div class="val" style="color:var(--orange)">${stats.remaining}</div></div>
+    <div class="stat-chip"><div class="lbl">平均分</div><div class="val">${stats.avgScore}</div></div>
+  </div>`;
+
+  if(!aiReady()){
+    html += `<div style="margin:14px 16px 0; padding:12px 14px; border-radius:12px; background:rgba(240,96,61,0.10); border:1px solid rgba(240,96,61,0.3); font-size:13.5px; line-height:1.6;">
+      ⚠️ 还没配置 AI Key，"AI 批改"功能用不了。<b>点右上角"AI 设置"填一个国内大模型的 API Key（推荐 DeepSeek）</b>。
+    </div>`;
+  }
+
+  html += `<div class="section-label">快速开始</div>`;
+  html += `<div class="cardgrid">
+    <div class="topic-card" onclick="resumeLast()">
+      <div>
+        <div class="icon" style="background:var(--violet)">▶</div>
+        <div class="ttl">继续上次</div>
+        <div class="sub">从第 ${LAST_VISIT.sentenceId} 句开始</div>
+      </div>
+    </div>
+    <div class="topic-card" onclick="randomOne()">
+      <div>
+        <div class="icon" style="background:var(--pink)">🎲</div>
+        <div class="ttl">随机一句</div>
+        <div class="sub">从所有未完成的句子随机抽</div>
+      </div>
+    </div>
+    <div class="topic-card" onclick="goList()">
+      <div>
+        <div class="icon" style="background:var(--blue)">📋</div>
+        <div class="ttl">查看全部</div>
+        <div class="sub">${stats.total} 句 · 按主题/难度筛选</div>
+      </div>
+    </div>
+    <div class="topic-card" onclick="filterDone()">
+      <div>
+        <div class="icon" style="background:var(--green)">✓</div>
+        <div class="ttl">已练习</div>
+        <div class="sub">${stats.done} 句 · 回顾历史批改</div>
+      </div>
+    </div>
+  </div>`;
+
+  // topic summary
+  const topicCounts = {};
+  SENTENCES.forEach(s=>{ topicCounts[s.topic] = (topicCounts[s.topic]||0)+1; });
+  html += `<div class="section-label">话题分布</div>`;
+  html += `<div style="margin:0 16px 12px; padding:14px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);">
+    <div class="pill-row">
+      ${Object.entries(topicCounts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="pill">${k}(${v})</span>`).join('')}
+    </div>
+  </div>`;
+
+  app.innerHTML = html;
+}
+
+/* ============================= LIST ============================= */
+function renderList(){
+  let filtered = SENTENCES.slice();
+  if(FILTER === 'undone') filtered = filtered.filter(s=>!PROGRESS[s.id]?.done);
+  else if(FILTER === 'done') filtered = filtered.filter(s=>PROGRESS[s.id]?.done);
+  else if(FILTER === 'topic' && TOPIC_FILTER) filtered = filtered.filter(s=>s.topic===TOPIC_FILTER);
+
+  let html = `<div class="backrow"><button class="backbtn" onclick="goHome()">‹ 返回</button></div>`;
+  html += `<div class="screen-title"><h2>${FILTER==='done'?'已练习':FILTER==='undone'?'未完成':'全部句子'}</h2><div class="count">${filtered.length} 句</div></div>`;
+
+  // filter bar
+  html += `<div class="toolbar">
+    <button class="tbtn ${FILTER==='all'?'active':''}" onclick="setFilter('all')">全部</button>
+    <button class="tbtn ${FILTER==='undone'?'active':''}" onclick="setFilter('undone')">未完成</button>
+    <button class="tbtn ${FILTER==='done'?'active':''}" onclick="setFilter('done')">已练习</button>
+  </div>`;
+
+  if(filtered.length === 0){
+    html += `<div class="empty">${FILTER==='done'?'还没有完成的句子，去练练吧！':'没有匹配的句子'}</div>`;
+  } else {
+    filtered.forEach(s=>{
+      const p = PROGRESS[s.id];
+      let statusCls = '', statusText = '';
+      if(p && p.done){
+        statusCls = 'done';
+        statusText = `✓ 已练 · ${p.score||'?'}分`;
+      } else if(p && p.partial){
+        statusCls = 'partial';
+        statusText = '⚠ 部分完成';
+      } else {
+        statusText = '○ 未练';
+      }
+      const stuck = !!PENDING_REQUESTS[s.id];
+      html += `<div class="sent-list-item ${p?.done?'done':p?.partial?'partial':''}" onclick="openSentence(${s.id})">
+        <div class="top">
+          <span class="num">第 ${s.id} 句</span>
+          <span class="status">${stuck?'⏳ 批改中…':statusText}</span>
+        </div>
+        <div class="cn">${s.cn || '<span style="color:#aaa;">（未填写，点击进入输入你自己的句子）</span>'}</div>
+        <div style="margin-top:6px; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <span class="pill">${s.topic}</span>
+            <span class="pill">${s.difficulty}</span>
+          </div>
+          <button class="small-link" onclick="event.stopPropagation(); resetSentence(${s.id})">重置</button>
+        </div>
+      </div>`;
+    });
+  }
+  html += `<div style="height:20px;"></div>`;
+  app.innerHTML = html;
+}
+
+function setFilter(f){
+  FILTER = f; TOPIC_FILTER = '';
+  renderList();
+}
+
+function goList(){ FILTER='all'; renderList(); }
+function filterDone(){ FILTER='done'; renderList(); }
+
+/* ============================= PRACTICE ============================= */
+function openSentence(id){
+  // self-heal: if this sentence's "grading" flag has been stuck for way too
+  // long (over 40s, well past our fetch timeout), it's dead — clear it
+  // automatically instead of trusting it forever and leaving the sentence
+  // stuck in a permanent "grading..." state.
+  const pending = PENDING_REQUESTS[id];
+  if(pending && Date.now() - (pending.ts||0) > 40000){
+    delete PENDING_REQUESTS[id];
+  }
+  CURRENT_SENTENCE = SENTENCES.find(s=>s.id===id);
+  LAST_VISIT.sentenceId = id;
+  storageSet('translation-last', LAST_VISIT);
+  // 加载用户自己填入的中文句子（替代原始教材内容）
+  const savedCn = storageGet('sentence-cn-'+id, '');
+  if (savedCn) CURRENT_SENTENCE.cn = savedCn;
+  // load previous translation if exists
+  const prev = storageGet('translation-draft-'+id, '');
+  CURRENT_TRANSLATION = prev;
+  // if this sentence has a grading request still in flight, honestly show that instead of resetting
+  GRADING = !!PENDING_REQUESTS[id];
+  LAST_RESULT = PROGRESS[id]?.result || null;
+  VIEW = 'practice';
+  render();
+}
+
+function saveSentenceCn(id, value){
+  storageSet('sentence-cn-'+id, value);
+  if (CURRENT_SENTENCE && CURRENT_SENTENCE.id === id) {
+    CURRENT_SENTENCE.cn = value;
+  }
+  const s = SENTENCES.find(x=>x.id===id);
+  if (s) s.cn = value;
+}
+
+function resumeLast(){ openSentence(LAST_VISIT.sentenceId); }
+function randomOne(){
+  const undone = SENTENCES.filter(s=>!PROGRESS[s.id]?.done);
+  const pool = undone.length>0 ? undone : SENTENCES;
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  openSentence(pick.id);
+}
+
+function renderPractice(){
+  const s = CURRENT_SENTENCE;
+  let html = `<div class="backrow"><button class="backbtn" onclick="goList()">‹ 返回题库</button></div>`;
+  html += `<div class="screen-title">
+    <h2>第 ${s.id} 句 / ${SENTENCES.length}</h2>
+    <div class="count">
+      <span class="pill">${s.topic}</span>
+      <span class="pill">${s.difficulty}</span>
+    </div>
+  </div>`;
+
+  // prompt - 中文句子改为用户自己输入
+  html += `<div class="prompt-card">
+    <div class="label">📝 中译英 · 请先填入你自己的中文句子，再翻译成英文</div>
+    <textarea id="cnInput" placeholder="在这里输入你自己的中文句子（比如来自课本、老师讲义或自己写的句子）..."
+      style="width:100%; min-height:60px; font-size:16px; font-weight:600; line-height:1.6;
+      border:1px solid var(--line,#ddd); border-radius:8px; padding:10px; font-family:inherit; resize:vertical;"
+      oninput="saveSentenceCn(${s.id}, this.value)">${escapeHtml(s.cn)}</textarea>
+    <div class="hint">💡 建议先想词伙 → 再想句式 → 最后落笔翻译</div>
+  </div>`;
+
+  // steps
+  html += `<div class="steps">
+    <b>结构化翻译法步骤：</b><br>
+    ① 思考可能使用的<b>词伙</b>（如 do exercise, enhance confidence）<br>
+    ② 思考可能使用的<b>句子结构</b>（主谓宾 / 从句 / 被动）<br>
+    ③ 写出你的英文翻译<br>
+    ④ AI 批改 → 对比参考 → 写出语法错误
+  </div>`;
+
+  // editor
+  const wc = CURRENT_TRANSLATION.trim().split(/\s+/).filter(w=>w.length>0).length;
+  html += `<div class="status-bar">
+    <div class="wc"><b>${wc}</b> 词</div>
+    <div style="flex:1; text-align:right;">
+      <button class="small-link" onclick="prevSentence()">‹ 上一句</button> · <button class="small-link" onclick="nextSentence()">下一句 ›</button>
+    </div>
+  </div>`;
+
+  html += `<div style="margin:0 16px 12px;">
+    <textarea id="transInput" placeholder="请在这里写下你的英文翻译...">${escapeHtml(CURRENT_TRANSLATION)}</textarea>
+  </div>`;
+
+  if(GRADING){
+    html += `<div class="row-btns">
+      <button class="btn btn-violet" disabled><span class="spinner"></span>AI 批改中…</button>
+      <button class="btn btn-ghost" onclick="cancelGrading(${s.id})">取消批改</button>
+    </div>
+    <div style="margin:0 16px 14px; font-size:12px; color:var(--ink-soft);">如果卡住太久（网络问题），点"取消批改"可以立刻恢复，重新点 AI 批改再试一次。请求最多等待 25 秒，超时会自动失败。</div>`;
+  } else {
+    html += `<div class="row-btns">
+      <button class="btn btn-violet" onclick="gradeTranslation()">AI 批改 ✨</button>
+      <button class="btn btn-ghost" onclick="clearTranslation()">清空</button>
+    </div>`;
+  }
+
+  // show previous result if exists
+  if(LAST_RESULT && !GRADING){
+    html += renderResultBox(LAST_RESULT, s);
+  }
+
+  app.innerHTML = html;
+
+  // bind input
+  const ta = document.getElementById('transInput');
+  if(ta){
+    ta.addEventListener('input', (e)=>{
+      CURRENT_TRANSLATION = e.target.value;
+      const wcEl = document.querySelector('.status-bar .wc b');
+      if(wcEl) wcEl.textContent = CURRENT_TRANSLATION.trim().split(/\s+/).filter(w=>w.length>0).length;
+      // auto save draft
+      storageSet('translation-draft-'+s.id, CURRENT_TRANSLATION);
+    });
+    ta.focus();
+  }
+}
+
+function escapeHtml(s){
+  if(!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function prevSentence(){
+  const idx = SENTENCES.findIndex(s=>s.id===CURRENT_SENTENCE.id);
+  if(idx > 0) openSentence(SENTENCES[idx-1].id);
+}
+function nextSentence(){
+  const idx = SENTENCES.findIndex(s=>s.id===CURRENT_SENTENCE.id);
+  if(idx < SENTENCES.length-1) openSentence(SENTENCES[idx+1].id);
+}
+function clearTranslation(){
+  if(!confirm('清空当前翻译？')) return;
+  CURRENT_TRANSLATION = '';
+  storageSet('translation-draft-'+CURRENT_SENTENCE.id, '');
+  render();
+}
+
+/* ============================= AI GRADING ============================= */
+async function gradeTranslation(){
+  if(!CURRENT_TRANSLATION || CURRENT_TRANSLATION.trim().length < 5){
+    alert('请先写一些翻译内容再提交批改。');
+    return;
+  }
+  if(!aiReady()){
+    openAISettings();
+    return;
+  }
+
+  // capture everything by value up front so that if the user navigates away
+  // mid-request, this request keeps working with the ORIGINAL sentence/text,
+  // and never mis-attributes results to whatever sentence happens to be open later.
+  const sentenceId = CURRENT_SENTENCE.id;
+  const sentenceCn = CURRENT_SENTENCE.cn;
+  const userText = CURRENT_TRANSLATION;
+  const myToken = ++REQUEST_SEQ;
+  PENDING_REQUESTS[sentenceId] = { token: myToken, ts: Date.now() };
+
+  GRADING = true; render();
+
+  // helper: is this specific request still the "live" one for its sentence?
+  const isLiveRequest = () => {
+    const p = PENDING_REQUESTS[sentenceId];
+    return !!p && p.token === myToken;
+  };
+
+  try{
+    // step 1: generate TWO reference translations: 7.5 (based on student level) + 9 (reference style)
+    const refPrompt = `请把下面这句中文翻译成两个水平的英文：
+
+中文：${sentenceCn}
+
+要求：
+1. 先给一个 7.5 分水平的译文：保留简单句结构，只在词汇和搭配上略作提升，不要太复杂。适合目标是 7-7.5 分的学生学习。
+2. 然后另起一行写 ---9 分---
+3. 再给一个9 分范文：句式多样、词汇高级、复杂结构。
+
+只输出这两段英文，中间用 ---9 分--- 分隔，不要任何其他解释、不要引号、不要 markdown。`;
+    const refFull = await callAIText(refPrompt);
+    // parse the two parts
+    let ref75 = '', ref9 = '';
+    const parts = refFull.split(/---9\s*分---/i);
+    ref75 = (parts[0] || '').trim();
+    ref9 = (parts[1] || '').trim();
+    // fallback if split failed
+    if(!ref75 && ref9){ ref75 = ref9; ref9 = ''; }
+    if(!ref75 && !ref9){ ref75 = refFull.trim(); }
+    // for grade prompt compatibility
+    const ref = ref75;
+    // step 2: grade
+    const result = await callAI(GRADE_PROMPT(sentenceCn, userText, ref));
+
+    // if a newer request for this same sentence has since superseded this one
+    // (or it was cancelled/reset), drop this stale result entirely
+    if(!isLiveRequest()){
+      return;
+    }
+    delete PENDING_REQUESTS[sentenceId];
+
+    if(ref75 && !result.ref_75) result.ref_75 = ref75;
+    if(ref9 && !result.ref_9) result.ref_9 = ref9;
+
+    // always persist the result against the sentence it actually belongs to,
+    // regardless of whether the user is still viewing it
+    PROGRESS[sentenceId] = {
+      done: result.is_correct,
+      score: result.overall,
+      ts: Date.now(),
+      partial: !result.is_correct && userText.trim().length > 5,
+      result: result
+    };
+    storageSet('translation-progress', PROGRESS);
+    storageSet('translation-draft-'+sentenceId, userText);
+
+    // only touch the live UI (spinner / re-render) if the user is still on this sentence
+    if(CURRENT_SENTENCE && CURRENT_SENTENCE.id === sentenceId){
+      LAST_RESULT = result;
+      GRADING = false;
+      render();
+    }
+  }catch(e){
+    // superseded/cancelled -> ignore this stale error silently
+    if(!isLiveRequest()){
+      return;
+    }
+    delete PENDING_REQUESTS[sentenceId];
+
+    // only show a blocking alert if the user is still actually looking at this sentence;
+    // otherwise a stray alert() would freeze the UI while they're doing something else
+    if(CURRENT_SENTENCE && CURRENT_SENTENCE.id === sentenceId){
+      GRADING = false;
+      let msg = '批改失败：'+(e.message||e);
+      if(e.message==='NO_KEY') msg='还没配置 AI Key。';
+      if(e.message && e.message.startsWith('JSON_PARSE_FAIL')){
+        msg = 'AI 返回格式异常，请重试一次（网络/服务偶发问题）。';
+      }
+      alert(msg);
+      render();
+    }
+  }
+}
+
+/* ============================= RESULT BOX ============================= */
+function renderResultBox(r, s){
+  let html = '';
+  // big score card
+  html += `<div class="feedback-box info">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="font-size:42px; font-weight:700; color:var(--violet)">${r.overall}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px; font-weight:600;">评分（0-9）</div>
+        <div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">${r.overall_zh||''}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // dim bars
+  if(r.dims){
+    html += `<div style="margin:0 16px 14px; padding:14px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);">
+      <div class="section-divider" style="margin-top:0;">四项评分</div>`;
+    const dimMap = { accuracy:'准确度', grammar:'语法', vocab:'词汇', style:'句式' };
+    Object.entries(r.dims).forEach(([k,v])=>{
+      const pct = (v/9*100).toFixed(0);
+      html += `<div class="grade-row"><div class="dim">${dimMap[k]||k}</div><div class="bar"><div style="width:${pct}%"></div></div><div class="v">${v}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // reference translation - 7.5 水平
+  if(r.ref_75){
+    html += `<div style="margin:0 16px 14px; padding:14px; background:#FBF7EA; border:1px dashed var(--paper-line); border-radius:14px;">
+      <div class="section-divider" style="margin-top:0; color:var(--violet);">🎯 7.5 分参考译文（保留你的风格）</div>
+      <div style="font-size:14px; line-height:1.85; color:var(--ink);">${escapeHtml(r.ref_75)}</div>
+    </div>`;
+  }
+
+  // 9 分参考范文（折叠）
+  if(r.ref_9){
+    html += `<div style="margin:0 16px 14px; padding:14px; background:#F5F0E5; border:1px dashed var(--paper-line); border-radius:14px; opacity:0.92;">
+      <details>
+        <summary style="cursor:pointer; font-size:12px; color:var(--ink-soft);">👀 9 分参考范文（仅供了解，不作为你的目标）</summary>
+        <div style="font-size:13.5px; line-height:1.85; color:var(--ink-soft); margin-top:8px; font-style:italic;">${escapeHtml(r.ref_9)}</div>
+      </details>
+    </div>`;
+  }
+
+  // ✅ 逐词拆解（核心方法）
+  if(r.word_by_word && r.word_by_word.length){
+    html += `<div style="margin:0 16px 14px; padding:14px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);">
+      <div class="section-divider" style="margin-top:0; color:var(--violet);">🔍 逐词拆解</div>`;
+    r.word_by_word.forEach(w=>{
+      let icon='✓', color='var(--green)';
+      if(w.status==='bad'){ icon='❌'; color='var(--red)'; }
+      else if(w.status==='ok'){ icon='⚠️'; color='var(--orange)'; }
+      html += `<div style="margin:6px 0; padding:8px 10px; background:#fff; border-radius:8px; border-left:3px solid ${color};">
+        <div style="font-size:13.5px;"><span style="color:${color}; margin-right:6px;">${icon}</span>${escapeHtml(w.phrase||'')}</div>
+        <div style="font-size:12.5px; color:var(--ink-soft); margin-top:3px; padding-left:22px;">${escapeHtml(w.comment||'')}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 关键修改点（1 个最主要的）
+  if(r.key_fix && r.key_fix.original){
+    html += `<div class="feedback-box warn">
+      <div class="feedback-title">🎯 关键修改点（7.5 调整）</div>
+      <div class="correction-row">
+        <div><span class="original">${escapeHtml(r.key_fix.original||'')}</span></div>
+        <div class="fixed">${escapeHtml(r.key_fix.fixed_75||'')}</div>
+        <div class="expl">📝 ${escapeHtml(r.key_fix.explanation||'')}<span class="tag">${escapeHtml(r.key_fix.type||'语法')}</span></div>
+      </div>
+    </div>`;
+  }
+
+  // 错误类型归类 - 告诉你这类错误怎么记
+  if(r.error_pattern){
+    html += `<div style="margin:0 16px 14px; padding:14px; background:#FBF7EA; border-radius:14px; box-shadow:var(--shadow); border:1px dashed var(--paper-line);">
+      <div class="section-divider" style="margin-top:0; color:var(--violet);">📂 错误归类：${escapeHtml(r.error_pattern.category||'其他')}</div>`;
+    if(r.error_pattern.description){
+      html += `<div style="font-size:13px; line-height:1.8; margin-bottom:8px;">常见例子：${escapeHtml(r.error_pattern.description)}</div>`;
+    }
+    if(r.error_pattern.how_to_remember){
+      html += `<div style="background:rgba(109,76,255,0.10); padding:10px 12px; border-radius:8px; font-size:13px; line-height:1.7;"><b style="color:var(--violet);">💡 怎么记：</b>${escapeHtml(r.error_pattern.how_to_remember)}</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // 进步建议（从当前分数到 7.5）
+  const currentScore = r.overall || 7;
+  if(currentScore < 7.5){
+    html += `<div class="feedback-box good">
+      <div class="feedback-title">📈 怎么从 ${currentScore} 提到 7.5</div>
+      <div class="feedback-line">${escapeHtml(r.how_to_next || '重点掌握名词 + 介词的固定搭配，如 impact on / rise in / access to / threat to / awareness of。这些搭配要作为整体记。')}</div>
+    </div>`;
+  }
+
+  // 整体评语
+  if(r.comment){
+    html += `<div class="feedback-box good">
+      <div class="feedback-title">📋 老师评语</div>
+      <div class="feedback-line">${escapeHtml(r.comment)}</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+/* ============================= NAV ============================= */
+function goHome(){ VIEW='home'; render(); }
+
+/* ============================= RENDER (with crash safety net) ============================= */
+function render(){
+  try{
+    if(VIEW==='home') return renderHome();
+    if(VIEW==='list') return renderList();
+    if(VIEW==='practice') return renderPractice();
+  }catch(err){
+    // if ANY rendering crash happens (malformed saved data, unexpected state, etc.),
+    // never leave the user stuck on a frozen/blank screen — always give them a
+    // clear, visible way out.
+    app.innerHTML = `<div style="padding:60px 20px; text-align:center;">
+      <div style="font-size:16px; font-weight:700; margin-bottom:10px;">⚠️ 这一页出错了</div>
+      <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:22px; line-height:1.6;">${escapeHtml(err && err.message ? err.message : String(err))}</div>
+      <div class="row-btns" style="justify-content:center;">
+        <button class="btn btn-primary" onclick="goHome()">返回首页</button>
+        <button class="btn btn-ghost" onclick="goList()">返回题库列表</button>
+      </div>
+    </div>`;
+  }
+}
+
+/* ============================= AI SETTINGS MODAL ============================= */
+function openAISettings(){
+  const p = PROVIDERS[AI_CFG.provider] || PROVIDERS.deepseek;
+  let html = `<div class="modal-mask" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <button class="close-x" onclick="closeModal()">×</button>
+      <h3>⚙️ AI 设置</h3>
+      <div class="sub">选择一个国内大模型厂商，把 API Key 填进去。每次批改都会用这个 Key 调用，Key 仅保存在你本机浏览器（localStorage），不会传到任何服务器。</div>
+
+      <label>厂商</label>
+      <div class="provider-pick">
+        ${Object.entries(PROVIDERS).map(([k,v])=>`<div class="pchip ${AI_CFG.provider===k?'active':''}" onclick="pickProvider('${k}')">${v.label}</div>`).join('')}
+      </div>
+
+      <label>API Key</label>
+      <input type="password" id="aiKeyInput" placeholder="${p.placeholder}" value="${AI_CFG.key||''}" autocomplete="off" />
+      <div class="sub" style="margin-top:6px;">📖 ${p.help}</div>
+
+      <div id="aiStatus" class="status idle">未测试</div>
+
+      <div class="row-btns" style="margin-top:14px;">
+        <button class="btn btn-primary" onclick="saveAndTest()">保存并测试</button>
+        <button class="btn btn-ghost" onclick="clearKey()">清空 Key</button>
+        <button class="btn btn-ghost" onclick="closeModal()">关闭</button>
+      </div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.id = 'modal-root';
+  document.body.appendChild(div);
+}
+
+function closeModal(){
+  const m = document.getElementById('modal-root');
+  if(m) m.remove();
+}
+
+function pickProvider(k){
+  AI_CFG.provider = k;
+  const p = PROVIDERS[k];
+  document.querySelectorAll('.pchip').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('aiKeyInput').placeholder = p.placeholder;
+}
+
+async function saveAndTest(){
+  const k = document.getElementById('aiKeyInput').value.trim();
+  const statusEl = document.getElementById('aiStatus');
+  if(!k){ statusEl.className='status err'; statusEl.textContent='Key 不能为空'; return; }
+  AI_CFG.key = k;
+  saveAICfg();
+  statusEl.className='status idle'; statusEl.innerHTML='<span class="spinner"></span>正在测试连接…';
+  try{
+    const r = await callAI('请只输出这个 JSON：{"ok":true}');
+    statusEl.className='status ok';
+    statusEl.textContent = '✓ 连接成功！'+(r.ok?' 模型已就绪。':' 收到响应但格式异常。');
+    setTimeout(()=>{ closeModal(); render(); }, 800);
+  }catch(e){
+    statusEl.className='status err';
+    statusEl.innerHTML = '✗ 连接失败：'+(e.message||e)+'<br><span style="font-size:12px;">常见原因：Key 错误 / 余额不足 / 浏览器 CORS（极少数情况，可换厂商）</span>';
+  }
+}
+
+function clearKey(){
+  AI_CFG.key = '';
+  saveAICfg();
+  closeModal();
+  render();
+}
+
+/* ============================= 词库系统 ============================= */
+let WORD_BOOK = []; // [{id, phrase, type, source, ts, meaning, sourceRefs}]
+let WORD_INDEX = {}; // phrase_lower -> wordbook entry id
+
+function loadWordBook(){
+  WORD_BOOK = storageGet('wordbook-entries', []);
+  WORD_INDEX = storageGet('wordbook-index', {});
+}
+function saveWordBook(){
+  storageSet('wordbook-entries', WORD_BOOK);
+  storageSet('wordbook-index', WORD_INDEX);
+}
+
+function normalizePhrase(p){
+  return (p||'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[.,;:!?'"]/g,'');
+}
+
+function addWordBookEntry(phrase, opts){
+  phrase = (phrase||'').trim();
+  if(!phrase) return null;
+  const key = normalizePhrase(phrase);
+  if(WORD_INDEX[key]) return WORD_BOOK.find(w=>w.id === WORD_INDEX[key]);
+  const id = 'wb_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  const entry = {
+    id,
+    phrase,
+    type: opts?.type || 'word',
+    source: opts?.source || 'manual',
+    ts: opts?.ts || Date.now(),
+    meaning: opts?.meaning || '',
+    sourceRefs: opts?.sourceRefs || [],
+    note: opts?.note || ''
+  };
+  WORD_BOOK.push(entry);
+  WORD_INDEX[key] = id;
+  return entry;
+}
+
+function attachSourceToEntry(entry, ref){
+  if(!entry || !ref) return;
+  if(entry.sourceRefs.some(r=>r.type===ref.type && r.id===ref.id && r.snippet===ref.snippet)) return;
+  entry.sourceRefs.push(ref);
+}
+
+function openWordbook(){
+  loadWordBook();
+  const html = `<div class="modal-mask" onclick="if(event.target===this)closeWordbook()">
+    <div class="modal" style="max-height:92vh; overflow-y:auto;">
+      <button class="close-x" onclick="closeWordbook()">×</button>
+      <h3>📚 词库</h3>
+      <div class="sub" style="font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; line-height:1.6;">你手动粘贴的词伙都在这里。点 🔊 读音，点「详情 ›」看完整词典。</div>
+      <div class="row-btns" style="margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <button class="btn btn-primary" onclick="openImportNote()">📥 导入</button>
+        <button class="btn btn-ghost" onclick="exportWordbook()">📤 导出</button>
+      </div>
+      <div id="wordbookBody">${renderWordbookList()}</div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.id = 'wordbook-modal';
+  document.body.appendChild(div);
+}
+
+function closeWordbook(){
+  const m = document.getElementById('wordbook-modal');
+  if(m) m.remove();
+  document.querySelectorAll('.word-detail-modal').forEach(m=>m.remove());
+}
+
+let WB_FILTER = null;
+function filterWordbook(f){
+  WB_FILTER = f;
+  const body = document.getElementById('wordbookBody');
+  if(body) body.innerHTML = renderWordbookList(f);
+}
+
+function renderWordbookList(filter){
+  if(!WORD_BOOK || WORD_BOOK.length === 0){
+    return `<div class="empty" style="padding:40px 20px; text-align:center; color:var(--ink-soft); font-size:13.5px; line-height:1.8;">
+      词库还是空的。<br>点「📥 导入」把你的备忘录词条粘进来。
+    </div>`;
+  }
+  const filtered = filter ? WORD_BOOK.filter(w=>w.type===filter) : WORD_BOOK;
+  const groups = {};
+  filtered.forEach(w=>{
+    const d = new Date(w.ts);
+    const dateKey = `${d.getFullYear()}年${(d.getMonth()+1).toString().padStart(2,'0')}月${d.getDate().toString().padStart(2,'0')}日`;
+    if(!groups[dateKey]) groups[dateKey] = [];
+    groups[dateKey].push(w);
+  });
+  const dates = Object.keys(groups).sort((a,b)=>{
+    const ka = groups[a][0].ts;
+    const kb = groups[b][0].ts;
+    return kb - ka;
+  });
+  let html = '<div style="display:flex; gap:6px; margin-bottom:12px; font-size:12px; flex-wrap:wrap;">';
+  html += `<span class="chip ${!filter?'on':''}" onclick="filterWordbook(null)" style="cursor:pointer; padding:4px 10px; border-radius:14px; background:${!filter?'var(--violet)':'var(--card)'}; color:${!filter?'#fff':'var(--ink)'};">全部 (${WORD_BOOK.length})</span>`;
+  html += `<span class="chip ${filter==='phrase'?'on':''}" onclick="filterWordbook('phrase')" style="cursor:pointer; padding:4px 10px; border-radius:14px; background:${filter==='phrase'?'var(--violet)':'var(--card)'}; color:${filter==='phrase'?'#fff':'var(--ink)'};">词伙 (${WORD_BOOK.filter(w=>w.type==='phrase').length})</span>`;
+  html += `<span class="chip ${filter==='word'?'on':''}" onclick="filterWordbook('word')" style="cursor:pointer; padding:4px 10px; border-radius:14px; background:${filter==='word'?'var(--violet)':'var(--card)'}; color:${filter==='word'?'#fff':'var(--ink)'};">单词 (${WORD_BOOK.filter(w=>w.type==='word').length})</span>`;
+  html += '</div>';
+  dates.forEach(date=>{
+    html += `<div style="font-size:12px; color:var(--ink-soft); margin:14px 4px 6px;">${date}</div>`;
+    groups[date].forEach(w=>{
+      html += renderWordbookRow(w);
+    });
+  });
+  return html;
+}
+
+function renderWordbookRow(w){
+  const safePhrase = escapeHtml(w.phrase).replace(/'/g,"\\'");
+  const dict = w._dict;
+  let inner = '';
+  if(dict){
+    // 完整展开：音标 + 多义项 + 例句
+    const ph = [dict.phonetic_uk && `英 ${escapeHtml(dict.phonetic_uk)}`, dict.phonetic_us && `美 ${escapeHtml(dict.phonetic_us)}`].filter(Boolean).join(' · ');
+    if(ph) inner += `<div style="font-size:12.5px; color:var(--ink-soft); margin:6px 0 8px;">${ph}</div>`;
+    if(dict.meanings && dict.meanings.length){
+      dict.meanings.forEach(m=>{
+        inner += `<div style="margin:6px 0; padding:8px 10px; background:#F1EFEB; border-radius:8px;">
+          <div style="font-size:13px;"><span style="background:var(--violet); color:#fff; padding:1px 6px; border-radius:4px; font-size:10px; margin-right:6px;">${escapeHtml(m.pos||'')}</span><b>${escapeHtml(m.meaning_cn||'')}</b></div>
+          ${m.meaning_en?`<div style="font-size:11.5px; color:var(--ink-soft); margin-top:3px;">${escapeHtml(m.meaning_en)}</div>`:''}
+          ${m.example?`<div style="margin-top:5px; padding:5px 8px; background:#fff; border-radius:6px; font-size:12.5px; line-height:1.5;">
+            <span>${escapeHtml(m.example)}</span>
+            <button style="border:none; background:transparent; color:var(--blue); font-size:13px; cursor:pointer; padding:0 4px;" onclick="event.stopPropagation();speakWord(\`${(m.example||'').replace(/`/g,'').replace(/\\\\/g,'\\\\\\\\').replace(/\$/g,'').slice(0,140).replace(/'/g,"\\'")}\`)">🔊</button>
+            ${m.example_cn?`<div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">${escapeHtml(m.example_cn)}</div>`:''}
+          </div>`:''}
+        </div>`;
+      });
+    }
+    if(dict.common_collocation){
+      inner += `<div style="font-size:11.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5;">🔥 ${escapeHtml(dict.common_collocation)}</div>`;
+    }
+    if(dict.memory_tip){
+      inner += `<div style="font-size:11.5px; color:var(--orange); margin-top:4px; line-height:1.5;">💡 ${escapeHtml(dict.memory_tip)}</div>`;
+    }
+  } else if(w.meaning && w.meaning !== '点详情查词...'){
+    inner += `<div style="margin-top:6px; padding:8px 10px; background:#F1EFEB; border-radius:8px; font-size:12.5px; color:var(--ink-soft);">${escapeHtml(w.meaning)}</div>`;
+  } else {
+    inner += `<div style="margin-top:6px; padding:8px 10px; background:#F1EFEB; border-radius:8px; font-size:12.5px; color:var(--ink-soft);">点详情查词...</div>`;
+  }
+  return `<div style="background:var(--card); border-radius:12px; padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow);">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="flex:1; min-width:0;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div style="font-size:22px; font-weight:700; color:var(--ink);">${escapeHtml(w.phrase)}</div>
+          <span style="font-size:10px; padding:1px 6px; border-radius:4px; background:${w.type==='phrase'?'rgba(109,76,255,0.15)':'rgba(62,140,255,0.15)'}; color:${w.type==='phrase'?'var(--violet)':'var(--blue)'}; flex-shrink:0;">${w.type==='phrase'?'词伙':'单词'}</span>
+          ${dict?'':`<button style="border:none; background:var(--violet); color:#fff; font-size:11px; padding:3px 10px; border-radius:12px; cursor:pointer;" onclick="event.stopPropagation();reFetchMeaning('${w.id}')">查释义</button>`}
+        </div>
+      </div>
+      <button style="border:none; background:transparent; font-size:24px; color:var(--blue); cursor:pointer; padding:4px 8px; flex-shrink:0;" onclick="event.stopPropagation();speakWord('${safePhrase}')" title="朗读">🔊</button>
+    </div>
+    <div style="margin-top:4px;">${inner}</div>
+  </div>`;
+}
+
+async function reFetchMeaning(id){
+  const w = WORD_BOOK.find(x=>x.id===id);
+  if(!w) return;
+  if(!aiReady()){ alert('请先在 AI 设置中填 API Key。'); return; }
+  w.meaning = '查询中...';
+  const body = document.getElementById('wordbookBody');
+  if(body) body.innerHTML = renderWordbookList(WB_FILTER);
+  await fetchMeaningForEntry(w);
+  saveWordBook();
+  if(body) body.innerHTML = renderWordbookList(WB_FILTER);
+}
+
+async function openWordDetail(id){
+  const w = WORD_BOOK.find(x=>x.id===id);
+  if(!w) return;
+  if(!w.meaning || w.meaning === '点详情查词...'){
+    await fetchMeaningForEntry(w);
+  }
+  const safePhrase = escapeHtml(w.phrase).replace(/'/g,"\\'");
+  const html = `<div class="modal-mask word-detail-modal" onclick="if(event.target===this)closeWordDetail()">
+    <div class="modal" style="max-height:92vh; overflow-y:auto;">
+      <button class="close-x" onclick="closeWordDetail()">×</button>
+      <div style="padding:0 4px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+          <div style="font-size:32px; font-weight:700; color:var(--ink); flex:1; word-break:break-all;">${escapeHtml(w.phrase)}</div>
+          <button class="btn btn-violet" style="padding:8px 14px; font-size:14px; flex-shrink:0;" onclick="speakWord('${safePhrase}')">🔊 朗读</button>
+        </div>
+        <div id="wdPhonetic" style="font-size:14px; color:var(--ink-soft); margin-bottom:14px;">查询中...</div>
+        <div id="wdMeanings"></div>
+        <div id="wdExtra"></div>
+        <div id="wdRefs" style="margin-top:18px;">${renderWordDetailRefs(w)}</div>
+      </div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div);
+  if(w._dict){
+    renderDictIntoWordDetail(w, w._dict);
+  } else {
+    fetchMeaningForEntry(w).then(()=>{
+      const phEl = document.getElementById('wdPhonetic');
+      if(phEl) renderDictIntoWordDetail(w, w._dict);
+    });
+  }
+}
+
+function closeWordDetail(){
+  document.querySelectorAll('.word-detail-modal').forEach(m=>m.remove());
+}
+
+async function fetchMeaningForEntry(w){
+  if(!aiReady()){ w.meaning = '请先在 AI 设置中填 API Key。'; return; }
+  try{
+    const prompt = `你是英汉词典 + 例句生成器。请查询英文词组/单词 "${w.phrase}" 的详细信息。
+
+只输出一个 JSON 对象，不要任何其他文字或 markdown：
+{
+  "phonetic_uk": "英式音标",
+  "phonetic_us": "美式音标",
+  "meanings": [
+    { "pos": "词性", "meaning_cn": "中文释义", "meaning_en": "英文释义", "example": "英文例句", "example_cn": "例句中文翻译" }
+  ],
+  "common_collocation": "常见词伙 / 拓展搭配",
+  "memory_tip": "记忆技巧 / 同义词辨析",
+  "transforms": {
+    "third_person": "第三人称单数或留空",
+    "present_participle": "现在分词或留空",
+    "past": "过去式或留空",
+    "past_participle": "过去分词或留空",
+    "noun": "名词形式或留空",
+    "adj": "形容词形式或留空"
+  }
+}`;
+    const data = await callAI(prompt);
+    w._dict = data;
+    w.meaning = (data.meanings && data.meanings[0]?.meaning_cn) || '查不到释义';
+    saveWordBook();
+  }catch(e){
+    w.meaning = '查询失败：'+(e.message||e);
+  }
+}
+
+function renderDictIntoWordDetail(w, data){
+  const phEl = document.getElementById('wdPhonetic');
+  const mEl = document.getElementById('wdMeanings');
+  const eEl = document.getElementById('wdExtra');
+  if(!phEl || !data) return;
+  let ph = '';
+  if(data.phonetic_uk) ph += `<span style="margin-right:14px;">英 ${escapeHtml(data.phonetic_uk)}</span>`;
+  if(data.phonetic_us) ph += `<span>美 ${escapeHtml(data.phonetic_us)}</span>`;
+  phEl.innerHTML = ph || '暂无音标';
+  let mHtml = '';
+  if(data.meanings && data.meanings.length){
+    data.meanings.forEach(m=>{
+      const exText = (m.example||'').replace(/`/g,'').replace(/\\/g,'\\\\').replace(/\$/g,'').slice(0,140);
+      const exSafe = exText.replace(/'/g,"\\'");
+      mHtml += `<div style="margin-bottom:10px; padding:10px 12px; background:#F1EFEB; border-radius:10px;">
+        <div style="font-size:13.5px;"><span style="background:var(--violet); color:#fff; padding:1px 6px; border-radius:5px; font-size:10px; margin-right:6px;">${escapeHtml(m.pos||'')}</span><b>${escapeHtml(m.meaning_cn||'')}</b></div>
+        ${m.meaning_en?`<div style="font-size:12px; color:var(--ink-soft); margin-top:3px;">${escapeHtml(m.meaning_en)}</div>`:''}
+        ${m.example?`<div style="margin-top:6px; padding:6px 8px; background:#fff; border-radius:6px; font-size:12.5px; font-style:italic; line-height:1.6;">
+          <span>${escapeHtml(m.example)}</span>
+          <button style="border:none; background:transparent; color:var(--blue); font-size:14px; cursor:pointer; padding:0 4px;" onclick="speakWord('${exSafe}')">🔊</button>
+          <div style="font-size:11px; color:var(--ink-soft); margin-top:2px; font-style:normal;">${escapeHtml(m.example_cn||'')}</div>
+        </div>`:''}
+      </div>`;
+    });
+  }
+  mEl.innerHTML = mHtml;
+  let eHtml = '';
+  if(data.transforms && Object.values(data.transforms).some(v=>v)){
+    eHtml += '<div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">📝 单词变形</div>';
+    eHtml += '<div style="background:var(--card); border-radius:10px; padding:10px 12px; margin-bottom:10px; box-shadow:var(--shadow);">';
+    const tMap = {third_person:'第三人称单数', present_participle:'现在分词', past:'过去式', past_participle:'过去分词', noun:'名词', adj:'形容词'};
+    Object.entries(data.transforms).forEach(([k,v])=>{
+      if(v) eHtml += `<div style="font-size:12.5px; padding:3px 0; display:flex; justify-content:space-between;"><span style="color:var(--ink-soft);">${tMap[k]||k}</span><b>${escapeHtml(v)}</b></div>`;
+    });
+    eHtml += '</div>';
+  }
+  if(data.common_collocation){
+    eHtml += '<div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">🔥 常见搭配</div>';
+    eHtml += `<div style="background:rgba(109,76,255,0.08); padding:10px 12px; border-radius:10px; margin-bottom:10px; font-size:13px; line-height:1.7;">${escapeHtml(data.common_collocation)}</div>`;
+  }
+  if(data.memory_tip){
+    eHtml += '<div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">💡 记忆技巧</div>';
+    eHtml += `<div style="background:rgba(245,158,11,0.10); padding:10px 12px; border-radius:10px; margin-bottom:10px; font-size:13px; line-height:1.7;">${escapeHtml(data.memory_tip)}</div>`;
+  }
+  eEl.innerHTML = eHtml;
+}
+
+function renderWordDetailRefs(w){
+  let html = '<div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">🔗 出处（反查）</div>';
+  if(w.source==='note' && w._noteContext){
+    html += `<div style="background:#FBF7EA; padding:10px 12px; border-radius:10px; font-size:12.5px; line-height:1.6; margin-bottom:8px;">
+      <div style="color:var(--ink-soft); margin-bottom:4px;">📝 来自备忘录：</div>
+      <div>${escapeHtml(w._noteContext)}</div>
+    </div>`;
+  }
+  if(w.sourceRefs && w.sourceRefs.length>0){
+    html += '<div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:6px;">💬 出现在这些句子里：</div>';
+    const seen = new Set();
+    w.sourceRefs.forEach(ref=>{
+      if(ref.type==='sentence'){
+        const key = 's'+ref.id;
+        if(seen.has(key)) return;
+        seen.add(key);
+        const s = SENTENCES.find(s=>s.id===ref.id);
+        if(s){
+          html += `<div style="background:var(--card); padding:10px 12px; border-radius:10px; margin-bottom:6px; box-shadow:var(--shadow); cursor:pointer;" onclick="closeWordDetail();closeWordbook();openSentence(${ref.id})">
+            <div style="font-size:11px; color:var(--violet); margin-bottom:3px;">第 ${ref.id} 句</div>
+            <div style="font-size:13px; line-height:1.5; color:var(--ink);">${s.cn ? escapeHtml(s.cn) : '<span style="color:#aaa;">（未填写）</span>'}</div>
+            ${ref.snippet?`<div style="font-size:11.5px; color:var(--ink-soft); margin-top:4px; font-style:italic; line-height:1.5;">译：${escapeHtml(ref.snippet)}</div>`:''}
+          </div>`;
+        }
+      } else if(ref.type==='note'){
+        const key = 'n'+ref.id;
+        if(seen.has(key)) return;
+        seen.add(key);
+        html += `<div style="background:#FBF7EA; padding:10px 12px; border-radius:10px; margin-bottom:6px; font-size:12.5px; line-height:1.5;">
+          <div style="font-size:11px; color:var(--orange); margin-bottom:3px;">📝 备忘录片段</div>
+          <div>${escapeHtml(ref.snippet||'')}</div>
+        </div>`;
+      }
+    });
+  }
+  if((!w.sourceRefs || !w.sourceRefs.length) && w.source!=='note'){
+    html += '<div style="font-size:12px; color:var(--ink-soft); padding:8px 0;">没有关联出处</div>';
+  }
+  return html;
+}
+
+function exportWordbook(){
+  if(WORD_BOOK.length===0){ alert('词库是空的'); return; }
+  const text = WORD_BOOK.map(w=>{
+    const d = new Date(w.ts);
+    const date = d.toISOString().slice(0,10);
+    return `[${date}] [${w.type}] ${w.phrase}\n  释义：${w.meaning||'（未查）'}\n  来源：${w.source}${w.sourceRefs?` (${w.sourceRefs.length} 处)`:''}\n`;
+  }).join('\n');
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'wordbook.txt';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 100);
+}
+
+function openImportNote(){
+  const html = `<div class="modal-mask" onclick="if(event.target===this)closeImportNote()">
+    <div class="modal">
+      <button class="close-x" onclick="closeImportNote()">×</button>
+      <h3>📥 导入备忘录</h3>
+      <div class="sub" style="font-size:12.5px; color:var(--ink-soft); margin-bottom:12px; line-height:1.6;">把你 iPhone 备忘录里的词条粘到下面，系统会识别每行 / 每个词的英文部分。点导入后会自动查释义。</div>
+      <textarea id="noteTextInput" style="min-height:280px; font-size:13px; line-height:1.6;" placeholder="例：&#10;&#10;go out to work&#10;go out（去外面&#10;outside（在外面&#10;prefer to do A rather than do B&#10;&#10;take steps / take measures / take action（采取措施&#10;tough problems / pressing issues"></textarea>
+      <div class="row-btns" style="margin-top:10px;">
+        <button class="btn btn-violet" onclick="doImportNote()">导入并解析</button>
+        <button class="btn btn-ghost" onclick="closeImportNote()">取消</button>
+      </div>
+      <div id="importResult" style="margin-top:10px; font-size:12px;"></div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.id = 'note-import-modal';
+  document.body.appendChild(div);
+  setTimeout(()=>document.getElementById('noteTextInput')?.focus(), 100);
+}
+
+function closeImportNote(){
+  const m = document.getElementById('note-import-modal');
+  if(m) m.remove();
+}
+
+async function doImportNote(){
+  const text = document.getElementById('noteTextInput').value;
+  if(!text.trim()){ alert('请粘贴备忘录内容'); return; }
+  const resultEl = document.getElementById('importResult');
+  resultEl.innerHTML = '<div class="feedback-box info" style="margin:0;"><span class="spinner"></span>识别中...</div>';
+  // 1. 先解析
+  const parsed = parseAndImportNoteText(text);
+  if(parsed.added === 0 && parsed.existing === 0){
+    resultEl.innerHTML = '<div class="feedback-box warn" style="margin:0;">没识别到任何英文词组。请检查输入。</div>';
+    return;
+  }
+  // 2. 批量查释义
+  if(aiReady()){
+    resultEl.innerHTML = `<div class="feedback-box info" style="margin:0;"><span class="spinner"></span>查询释义中... 0/${parsed.newEntries.length}</div>`;
+    for(let i=0;i<parsed.newEntries.length;i++){
+      const e = parsed.newEntries[i];
+      await fetchMeaningForEntry(e);
+      resultEl.innerHTML = `<div class="feedback-box info" style="margin:0;"><span class="spinner"></span>查询释义中... ${i+1}/${parsed.newEntries.length}</div>`;
+    }
+    saveWordBook();
+  }
+  resultEl.innerHTML = `<div class="feedback-box good" style="margin:0;">导入完成！新增 ${parsed.added} 个词条${parsed.existing?`，${parsed.existing} 个已存在`:''}。</div>`;
+  setTimeout(()=>{
+    closeImportNote();
+    const body = document.getElementById('wordbookBody');
+    if(body) body.innerHTML = renderWordbookList(WB_FILTER);
+  }, 1500);
+}
+
+function parseAndImportNoteText(text){
+  loadWordBook();
+  let added = 0;
+  let existing = 0;
+  const newEntries = [];
+  const now = Date.now();
+  const lines = text.split(/\n/);
+  const groups = [];
+  let cur = [];
+  lines.forEach(line=>{
+    if(line.trim()){
+      cur.push(line);
+    } else {
+      if(cur.length) groups.push(cur);
+      cur = [];
+    }
+  });
+  if(cur.length) groups.push(cur);
+  groups.forEach((group, gIdx)=>{
+    group.forEach(line=>{
+      const candidates = [];
+      line.split('/').forEach(part=>{
+        const m = part.match(/^\s*([a-zA-Z][a-zA-Z\s,'-]*[a-zA-Z])\s*[\(（:：]?/);
+        if(m && m[1]){
+          candidates.push(m[1].trim());
+        } else {
+          const m2 = part.match(/^\s*([a-zA-Z][a-zA-Z\s,'-]*)/);
+          if(m2 && m2[1] && m2[1].trim().length>=2) candidates.push(m2[1].trim());
+        }
+      });
+      const firstEn = line.match(/^\s*([a-zA-Z][a-zA-Z\s,'-]+[a-zA-Z])/);
+      if(firstEn) candidates.push(firstEn[1].trim());
+      candidates.forEach(c=>{
+        const phrase = c.trim();
+        if(!phrase || phrase.length<2) return;
+        if(!/[a-zA-Z]/.test(phrase)) return;
+        const key = normalizePhrase(phrase);
+        if(!key) return;
+        const wordCount = phrase.split(/\s+/).filter(w=>/^[a-zA-Z]/.test(w)).length;
+        const type = wordCount >= 2 ? 'phrase' : 'word';
+        if(WORD_INDEX[key]){
+          const ex = WORD_BOOK.find(w=>w.id === WORD_INDEX[key]);
+          if(ex){
+            attachSourceToEntry(ex, {type:'note', id:'g'+gIdx, snippet: line.slice(0,80)});
+            ex.source = 'note';
+            existing++;
+          }
+          return;
+        }
+        const entry = addWordBookEntry(phrase, {
+          type, source: 'note', ts: now,
+          sourceRefs: [{type:'note', id:'g'+gIdx, snippet: line.slice(0,80)}],
+          note: line
+        });
+        if(entry){
+          entry._noteContext = group.join(' | ').slice(0,200);
+          newEntries.push(entry);
+          added++;
+        }
+      });
+    });
+  });
+  saveWordBook();
+  return {added, existing, newEntries};
+}
+
+/* ============================= 全局悬浮查词按钮 ============================= */
+function ensureFloatSearchBtn(){
+  if(document.getElementById('floatSearchBtn')) return;
+  const btn = document.createElement('button');
+  btn.id = 'floatSearchBtn';
+  btn.innerHTML = '🔍';
+  btn.title = '查词';
+  btn.style.cssText = 'position:fixed; right:14px; bottom:80px; width:50px; height:50px; border-radius:50%; border:none; background:var(--violet); color:#fff; font-size:22px; box-shadow:0 4px 14px rgba(109,76,255,0.4); z-index:40; cursor:pointer; display:flex; align-items:center; justify-content:center;';
+  btn.onclick = ()=>openDictLookup();
+  document.body.appendChild(btn);
+  btn.addEventListener('touchstart', ()=>{
+    const active = document.activeElement;
+    if(active && active.blur) active.blur();
+  });
+}
+
+/* ============================= INIT ============================= */
+boot();
+loadWordBook();
+ensureFloatSearchBtn();
+
+/* ============================= 查词功能 ============================= */
+let dictLookupCache = {}; // word -> {phonetic, meaning, audioReady}
+
+function openDictLookup(prefill){
+  const html = `<div class="modal-mask" onclick="if(event.target===this)closeDictLookup()">
+    <div class="modal">
+      <button class="close-x" onclick="closeDictLookup()">×</button>
+      <h3>📖 查单词</h3>
+      <div class="sub" style="font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; line-height:1.6;">输入英文单词 → 看音标 + 释义 + 例句 → 点 🔊 用 iOS Siri 高级语音朗读</div>
+      <input type="text" id="dictInput" placeholder="输入单词，如 accommodation" value="${prefill||''}" style="text-transform:none;" onkeydown="if(event.key==='Enter')doDictLookup()">
+      <div class="row-btns" style="margin-top:10px;">
+        <button class="btn btn-violet" onclick="doDictLookup()">查询</button>
+      </div>
+      <div id="dictResult" style="margin-top:14px;"></div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.id = 'dict-modal';
+  document.body.appendChild(div);
+  setTimeout(()=>{
+    const input = document.getElementById('dictInput');
+    if(input){ input.focus(); if(prefill) doDictLookup(); }
+  }, 100);
+}
+
+function closeDictLookup(){
+  speechSynthesis.cancel();
+  const m = document.getElementById('dict-modal');
+  if(m) m.remove();
+}
+
+async function doDictLookup(){
+  const word = (document.getElementById('dictInput').value || '').trim();
+  if(!word){ return; }
+  const resultEl = document.getElementById('dictResult');
+  resultEl.innerHTML = '<div class="feedback-box info" style="margin:0;"><span class="spinner"></span>查询中...</div>';
+  // 先查缓存
+  const cached = dictLookupCache[word.toLowerCase()];
+  if(cached){
+    renderDictResult(word, cached);
+    return;
+  }
+  // 用 AI 查
+  if(!aiReady()){
+    resultEl.innerHTML = '<div class="feedback-box warn" style="margin:0;">请先在 AI 设置里填 API Key。</div>';
+    return;
+  }
+  try{
+    const prompt = `你是英汉词典。请查询单词 "${word}" 的详细信息。
+
+只输出一个 JSON 对象，不要任何其他文字或 markdown：
+{
+  "phonetic_uk": "英式音标，如 /əˌkɒməˈdeɪʃn/",
+  "phonetic_us": "美式音标",
+  "meanings": [
+    { "pos": "词性 (n./v./adj./adv.)", "meaning_cn": "中文释义", "meaning_en": "英文释义", "example": "英文例句", "example_cn": "例句中文翻译" }
+  ],
+  "common_collocation": "常见词伙（搭配）",
+  "memory_tip": "记忆技巧 / 同义词辨析（如果适用）"
+}`;
+    const data = await callAI(prompt);
+    dictLookupCache[word.toLowerCase()] = data;
+    renderDictResult(word, data);
+  }catch(e){
+    let msg = '查询失败：'+(e.message||e);
+    if(e.message && e.message.startsWith('JSON_PARSE_FAIL')){
+      msg = '查询返回格式异常，请重试。';
+    }
+    resultEl.innerHTML = `<div class="feedback-box warn" style="margin:0;">${escapeHtml(msg)}</div>`;
+  }
+}
+
+function renderDictResult(word, data){
+  const resultEl = document.getElementById('dictResult');
+  // 预加载语音
+  ensureVoice(word);
+  let html = '';
+  // 音标 + 朗读
+  html += `<div style="background:var(--card); border-radius:12px; padding:14px; box-shadow:var(--shadow); margin-bottom:10px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <div style="font-size:22px; font-weight:700; color:var(--violet);">${escapeHtml(word)}</div>
+      <button class="btn btn-violet" style="padding:6px 12px; font-size:13px;" onclick="speakWord('${escapeHtml(word).replace(/'/g,"\\'")}')">🔊 朗读</button>
+    </div>
+    ${data.phonetic_uk?`<div style="font-size:13px; color:var(--ink-soft); margin-bottom:2px;">英 ${escapeHtml(data.phonetic_uk)}</div>`:''}
+    ${data.phonetic_us?`<div style="font-size:13px; color:var(--ink-soft);">美 ${escapeHtml(data.phonetic_us)}</div>`:''}
+  </div>`;
+  // 释义
+  if(data.meanings && data.meanings.length){
+    html += '<div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">释义</div>';
+    data.meanings.forEach(m=>{
+      html += `<div style="background:var(--card); border-radius:10px; padding:10px 12px; margin-bottom:6px; box-shadow:var(--shadow);">
+        <div style="font-size:13px;"><span style="background:var(--violet); color:#fff; padding:1px 6px; border-radius:6px; font-size:11px; margin-right:6px;">${escapeHtml(m.pos||'')}</span><b>${escapeHtml(m.meaning_cn||'')}</b></div>
+        ${m.meaning_en?`<div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${escapeHtml(m.meaning_en)}</div>`:''}
+        ${m.example?`<div style="margin-top:6px; padding:6px 10px; background:#FBF7EA; border-radius:6px; font-size:12.5px; font-style:italic;">${escapeHtml(m.example)}<div style="font-size:11px; color:var(--ink-soft); margin-top:2px; font-style:normal;">${escapeHtml(m.example_cn||'')}</div></div>`:''}
+      </div>`;
+    });
+  }
+  // 常见词伙
+  if(data.common_collocation){
+    html += `<div style="margin-top:10px;"><div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">🔥 常见词伙</div><div style="background:rgba(109,76,255,0.08); padding:10px 12px; border-radius:10px; font-size:13.5px; line-height:1.6;">${escapeHtml(data.common_collocation)}</div></div>`;
+  }
+  // 记忆技巧
+  if(data.memory_tip){
+    html += `<div style="margin-top:10px;"><div style="font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;">💡 记忆技巧</div><div style="background:rgba(245,158,11,0.10); padding:10px 12px; border-radius:10px; font-size:13.5px; line-height:1.6;">${escapeHtml(data.memory_tip)}</div></div>`;
+  }
+  resultEl.innerHTML = html;
+}
+
+function ensureVoice(word){
+  if(!('speechSynthesis' in window)) return;
+  // 先静默朗读一次让 iOS 加载语音
+  try{
+    const u = new SpeechSynthesisUtterance(word);
+    u.volume = 0;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function speakWord(word){
+  if(!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined'){
+    alert('当前浏览器不支持语音功能，建议使用 iOS Safari 或 Chrome。');
+    return;
+  }
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US';
+    u.rate = 0.9;
+    u.pitch = 1;
+    // 尝试用 iOS 高级 Siri 语音（如果系统装了）
+    const voices = speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.name.includes('Samantha')) ||
+                     voices.find(v => v.name.includes('Karen')) ||
+                     voices.find(v => v.name.includes('Daniel')) ||
+                     voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) ||
+                     voices.find(v => v.lang.startsWith('en-US') && v.localService) ||
+                     voices.find(v => v.lang.startsWith('en')) ||
+                     voices[0];
+    if(preferred){
+      u.voice = preferred;
+    }
+    speechSynthesis.speak(u);
+  }catch(e){
+    alert('语音播放失败：'+(e.message||e));
+  }
+}
+
+/* ============================= 错题汇总 ============================= */
+let ERROR_PATTERN_CACHE = null;
+
+function openErrorSummary(){
+  const html = `<div class="modal-mask" onclick="if(event.target===this)closeErrorSummary()">
+    <div class="modal" style="max-height:90vh; overflow-y:auto;">
+      <button class="close-x" onclick="closeErrorSummary()">×</button>
+      <h3>🔍 错题汇总</h3>
+      <div class="sub" style="font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; line-height:1.6;">把所有批改过的句子里出现的错误按"错误类型"聚类，找出你的常犯问题 + 知识点讲解 + 怎么改</div>
+      <div id="errorSummaryBody">
+        ${renderErrorSummaryLocal()}
+      </div>
+      <div class="row-btns" style="margin-top:14px;">
+        <button class="btn btn-violet" onclick="aiErrorSummary()">🧠 AI 深度分析</button>
+        <button class="btn btn-ghost" onclick="closeErrorSummary()">关闭</button>
+      </div>
+    </div>
+  </div>`;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.id = 'error-summary-modal';
+  document.body.appendChild(div);
+}
+
+function closeErrorSummary(){
+  const m = document.getElementById('error-summary-modal');
+  if(m) m.remove();
+}
+
+function renderErrorSummaryLocal(){
+  const allErrors = collectAllErrors();
+  if(allErrors.length === 0){
+    return '<div class="empty" style="padding:30px 20px;">还没有批改记录，先去练几道题再来汇总。</div>';
+  }
+  // 本地按 type 聚合
+  const groups = {};
+  allErrors.forEach(e=>{
+    const t = e.type || '其他';
+    if(!groups[t]) groups[t] = [];
+    groups[t].push(e);
+  });
+  let html = '<div style="margin-bottom:10px; font-size:12px; color:var(--ink-soft);">📊 共 ${allErrors.length} 条错误记录，按类型分组：</div>';
+  // 按出现次数排序
+  const sortedTypes = Object.entries(groups).sort((a,b)=>b[1].length-a[1].length);
+  sortedTypes.forEach(([type, list])=>{
+    html += `<div style="margin-bottom:10px; padding:10px 12px; background:var(--card); border-radius:10px; box-shadow:var(--shadow);">
+      <div style="font-size:14px; font-weight:700; color:var(--violet); margin-bottom:6px;">${escapeHtml(type)}（${list.length} 次）</div>
+      <div style="font-size:12.5px; color:var(--ink-soft); line-height:1.6;">`;
+    list.slice(0,3).forEach(e=>{
+      html += `<div style="margin-bottom:4px; padding-left:8px; border-left:2px solid var(--paper-line);">第 ${e.sid} 句：<span style="text-decoration:line-through; color:var(--red);">${escapeHtml(e.original)}</span> → <span style="color:var(--green);">${escapeHtml(e.fixed)}</span></div>`;
+    });
+    if(list.length > 3) html += `<div style="font-size:11px; color:var(--ink-soft); margin-top:4px;">...还有 ${list.length-3} 条类似错误</div>`;
+    html += '</div></div>';
+  });
+  return html;
+}
+
+function collectAllErrors(){
+  const errors = [];
+  Object.entries(PROGRESS).forEach(([sid, p])=>{
+    if(!p.result) return;
+    // 新格式：key_fix（单一关键错误）
+    if(p.result.key_fix && p.result.key_fix.original){
+      errors.push({
+        sid: sid,
+        type: p.result.key_fix.type || '其他',
+        original: p.result.key_fix.original || '',
+        fixed: p.result.key_fix.fixed_75 || '',
+        explanation: p.result.key_fix.explanation || ''
+      });
+    }
+    // 兼容旧格式：corrections（多个错误）
+    if(p.result.corrections && p.result.corrections.length){
+      p.result.corrections.forEach(c=>{
+        errors.push({
+          sid: sid,
+          type: c.type || '其他',
+          original: c.original || '',
+          fixed: c.fixed || '',
+          explanation: c.explanation || ''
+        });
+      });
+    }
+  });
+  return errors;
+}
+
+async function aiErrorSummary(){
+  if(!aiReady()){
+    alert('请先在 AI 设置里填 API Key。');
+    return;
+  }
+  const errors = collectAllErrors();
+  if(errors.length === 0){
+    alert('还没有批改记录。');
+    return;
+  }
+  const bodyEl = document.getElementById('errorSummaryBody');
+  bodyEl.innerHTML = '<div class="feedback-box info" style="margin:0;"><span class="spinner"></span>AI 正在分析你的所有错题...</div>';
+  const summary = errors.map(e=>`第${e.sid}句 [${e.type}]: "${e.original}" → "${e.fixed}" (${e.explanation})`).join('\n');
+  const errorTypeBreakdown = {};
+  errors.forEach(e=>{
+    errorTypeBreakdown[e.type] = (errorTypeBreakdown[e.type] || 0) + 1;
+  });
+  const typeSummary = Object.entries(errorTypeBreakdown).map(([t,c])=>`${t}: ${c}次`).join(', ');
+  const prompt = `你是一位专业的雅思写作老师，帮我把以下错题做个深度汇总。
+
+【学生所有错题】
+${summary}
+
+【任务】
+1. 按错误类型聚类（搭配/语法/用词/句式等）
+2. 找出学生**最容易犯的 3-5 个共性问题**
+3. 每个问题给出**知识点讲解**（为什么这么用是错的，正确用法是什么）
+4. 给出**怎么记**的具体方法（举例说明）
+5. 给出**3-5 个练习建议**
+
+请只输出一个 JSON 对象：
+{
+  "total": 数字,
+  "by_type": { "类型1": 数字, "类型2": 数字 },
+  "patterns": [
+    { "name": "问题名称", "count": 涉及几道题, "knowledge": "知识点讲解", "memory_tip": "怎么记", "examples": ["正确例子 1", "正确例子 2"] }
+  ],
+  "practice_plan": ["具体练习建议 1", "练习建议 2"]
+}`;
+  try{
+    const result = await callAI(prompt);
+    bodyEl.innerHTML = renderAISummary(result);
+  }catch(e){
+    let msg = 'AI 分析失败：'+(e.message||e);
+    if(e.message && e.message.startsWith('JSON_PARSE_FAIL')){
+      msg = 'AI 返回格式异常，请重试。';
+    }
+    bodyEl.innerHTML = `<div class="feedback-box warn" style="margin:0;">${escapeHtml(msg)}</div>`;
+  }
+}
+
+function renderAISummary(r){
+  let html = '';
+  if(r.patterns && r.patterns.length){
+    html += '<div style="font-size:14px; font-weight:700; color:var(--violet); margin-bottom:10px;">🎯 你的共性问题（按严重程度排序）</div>';
+    r.patterns.forEach((p,i)=>{
+      html += `<div style="background:var(--card); border-radius:12px; padding:14px; margin-bottom:10px; box-shadow:var(--shadow); border-left:4px solid var(--violet);">
+        <div style="font-size:15px; font-weight:700; margin-bottom:4px;">${i+1}. ${escapeHtml(p.name||'')} <span style="font-size:11px; color:var(--ink-soft); font-weight:normal;">（${p.count||0} 道题）</span></div>
+        <div style="font-size:13px; color:var(--ink-soft); line-height:1.7; margin-bottom:8px;">${escapeHtml(p.knowledge||'')}</div>
+        ${p.memory_tip?`<div style="background:rgba(109,76,255,0.08); padding:8px 10px; border-radius:8px; font-size:12.5px; margin-bottom:6px;"><b style="color:var(--violet);">💡 怎么记：</b>${escapeHtml(p.memory_tip)}</div>`:''}
+        ${p.examples && p.examples.length?`<div style="font-size:12.5px; color:var(--green); line-height:1.6;">
+          ${p.examples.map(ex=>`✓ ${escapeHtml(ex)}`).join('<br>')}
+        </div>`:''}
+      </div>`;
+    });
+  }
+  if(r.practice_plan && r.practice_plan.length){
+    html += '<div style="font-size:14px; font-weight:700; color:var(--orange); margin:14px 0 10px;">📅 练习建议</div>';
+    html += '<div style="background:rgba(245,158,11,0.10); padding:12px 14px; border-radius:12px; font-size:13.5px; line-height:1.8;">';
+    r.practice_plan.forEach((p,i)=>{
+      html += `<div>${i+1}. ${escapeHtml(p)}</div>`;
+    });
+    html += '</div>';
+  }
+  return html;
+}
+
+</script>
+</body>
+</html>
